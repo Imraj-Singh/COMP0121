@@ -6,7 +6,7 @@ clear
 % Author - Imraj
 
 % initialise the video
-video = VideoWriter(['1_1', '.mp4'], 'MPEG-4');
+video = VideoWriter(['2_1', '.mp4'], 'MPEG-4');
 
 % set the frame rate
 frameRate = 100;
@@ -62,7 +62,7 @@ video.close();
 % Author - Imraj
 
 % initialise the video
-video = VideoWriter(['1_2', '.mp4'], 'MPEG-4');
+video = VideoWriter(['2_2', '.mp4'], 'MPEG-4');
 
 % set the frame rate
 frameRate = 100;
@@ -118,7 +118,7 @@ video.close();
 % Author - Imraj
 
 % initialise the video
-video = VideoWriter(['1_3', '.mp4'], 'MPEG-4');
+video = VideoWriter(['2_3', '.mp4'], 'MPEG-4');
 
 % set the frame rate
 frameRate = 100;

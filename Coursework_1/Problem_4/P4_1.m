@@ -22,7 +22,7 @@ dtheta = 90 * pi / 180;
 % Calculate neccessary parameters
 
 % Precession frequency
-omega0 = 1 * 2 * pi;
+omega0 = 2 * 2 * pi;
 
 % Define modelling parameters
 RFPulse = 1;
@@ -55,8 +55,8 @@ endIndex = length(time);
 timeRelax = time(endForce:endIndex)-1;
 M = [0, 1, 0]';
 
-Msoln(endForce:endIndex,1) = exp(-timeRelax./T2)*M(1);%.*(M(1)*cos(omega0.*timeRelax) + M(2)*sin(omega0.*timeRelax));
-Msoln(endForce:endIndex,2) = exp(-timeRelax./T2)*M(2);%.*(M(2)*cos(omega0.*timeRelax) - M(1)*sin(omega0.*timeRelax));
+Msoln(endForce:endIndex,1) = exp(-timeRelax./T2).*(M(1)*cos(omega0.*timeRelax) + M(2)*sin(omega0.*timeRelax));
+Msoln(endForce:endIndex,2) = exp(-timeRelax./T2).*(M(2)*cos(omega0.*timeRelax) - M(1)*sin(omega0.*timeRelax));
 Msoln(endForce:endIndex,3) = M(3)*exp(-timeRelax./T1) + 1*(1-exp(-timeRelax./T1));
 
 %% Animation module
@@ -70,11 +70,12 @@ video.set('FrameRate', frameRate);
 video.open();
 
 h = figure;
-frame = getframe(h);
-video.writeVideo(frame);
 
 for i=1:length(time)
     quiver3(0,0,0,Msoln(i,1),Msoln(i,2),Msoln(i,3),'linewidth',5,'LineStyle','-','Color','r')
+    hold on
+    plot3(Msoln(1:i-1,1),Msoln(1:i-1,2),Msoln(1:i-1,3),'k--','linewidth',2)
+    quiver3(0,0,0,0,0,1,'linewidth',2,'LineStyle','--','Color','k')
     title(['Time: ', num2str(time(i)),'s'], "interpreter", "latex", "fontsize", 15)
     grid on
     box on
@@ -84,9 +85,6 @@ for i=1:length(time)
     xlabel("$M_x$", "interpreter", "latex", "fontsize", 15)
     ylabel("$M_y$", "interpreter", "latex", "fontsize", 15)
     zlabel("$M_z$", "interpreter", "latex", "fontsize", 15)
-    hold on
-    plot3(Msoln(1:i-1,1),Msoln(1:i-1,2),Msoln(1:i-1,3),'b-')
-    %quiver3(zeros(i-1,1),zeros(i-1,1),zeros(i-1,1),Msoln(1:i-1,1),Msoln(1:i-1,2),Msoln(1:i-1,3),'linewidth',1,'LineStyle','--','Color','b')
     hold off
     frame = getframe(h);
     video.writeVideo(frame);

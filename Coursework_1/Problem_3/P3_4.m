@@ -15,8 +15,11 @@ T1 = T2 * 2;
 
 % Calculate neccessary parameters
 
-% Larmor frequency
-omega0 = 2 * 2 * pi;
+% Precession frequency
+omega0 = 1 * 2 * pi;
+
+% Define modelling parameters
+RFPulse = 1;
 
 % End time
 t = 6;
@@ -27,8 +30,8 @@ time = linspace(0, t, t * resolution + 1);
 
 
 
-Msoln(:,1) = exp(-time./T2).*(M(1)*cos(omega0.*time) + M(2)*sin(omega0.*time));
-Msoln(:,2) = exp(-time./T2).*(M(2)*cos(omega0.*time) - M(1)*sin(omega0.*time));
+Msoln(:,1) = exp(-time./T2).*(M(1)*cos(omega0/10.*time) + M(2)*sin(omega0/10.*time));
+Msoln(:,2) = exp(-time./T2).*(M(2)*cos(omega0/10.*time) - M(1)*sin(omega0/10.*time));
 Msoln(:,3) = M(3)*exp(-time./T1) + M0(3)*(1-exp(-time./T1));
 
 
@@ -36,7 +39,7 @@ Msoln(:,3) = M(3)*exp(-time./T1) + M0(3)*(1-exp(-time./T1));
 % Author: Imraj Singh 03/11/2020
 
 % initialise the video
-video = VideoWriter(['3_2', '.mp4'], 'MPEG-4');
+video = VideoWriter(['3_4', '.mp4'], 'MPEG-4');
 
 % set the frame rate
 frameRate = resolution;

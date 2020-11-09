@@ -17,7 +17,7 @@ T2 = 1;
 T1 = T2 * 2;
 
 % Flip angle
-dtheta = 90 * pi / 180;
+dtheta = 180 * pi / 180;
 
 % Calculate neccessary parameters
 
@@ -53,7 +53,7 @@ Msoln(1:endForce,3) = M(3)*cos(omega1.*time(1:endForce)) - M(2)*sin(omega1.*time
 
 endIndex = length(time);
 timeRelax = time(endForce:endIndex)-1;
-M = [0, 1, 0]';
+M = [Msoln(endForce,1), Msoln(endForce,2), Msoln(endForce,3)]';
 
 Msoln(endForce:endIndex,1) = exp(-timeRelax./T2).*(M(1)*cos(omega0.*timeRelax) + M(2)*sin(omega0.*timeRelax));
 Msoln(endForce:endIndex,2) = exp(-timeRelax./T2).*(M(2)*cos(omega0.*timeRelax) - M(1)*sin(omega0.*timeRelax));
@@ -80,7 +80,7 @@ for i=1:length(time)
     box on
     xlim([-1 1]);
     ylim([-1 1]);
-    zlim([0 1]);
+    zlim([-1 1]);
     xlabel("$M_x$", "interpreter", "latex", "fontsize", 15)
     ylabel("$M_y$", "interpreter", "latex", "fontsize", 15)
     zlabel("$M_z$", "interpreter", "latex", "fontsize", 15)

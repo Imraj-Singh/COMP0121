@@ -27,16 +27,16 @@ time = linspace(0, t, t * resolution + 1);
 
 
 
-Msoln(:,1) = exp(-time./T2).*(M(1)*cos(omega0.*time) + M(2)*sin(omega0.*time));
-Msoln(:,2) = exp(-time./T2).*(M(2)*cos(omega0.*time) - M(1)*sin(omega0.*time));
-Msoln(:,3) = M(3)*exp(-time./T1) + M0(3)*(1-exp(-time./T1));
+Msoln(:,1) = M(1)*cos(omega0.*time) + M(2)*sin(omega0.*time);
+Msoln(:,2) = M(2)*cos(omega0.*time) - M(1)*sin(omega0.*time);
+Msoln(:,3) = M(3);
 
 
 %% Animation module
 % Author: Imraj Singh 03/11/2020
 
 % initialise the video
-video = VideoWriter(['3_2', '.mp4'], 'MPEG-4');
+video = VideoWriter(['3_1', '.mp4'], 'MPEG-4');
 
 % set the frame rate
 frameRate = resolution;

@@ -35,8 +35,8 @@ time = linspace(0,t,1000001);
 
 Msoln = zeros(1000001,3);
 
-Msoln(:,1) = exp(-time./T2).*(M(1)*cos(omega0/100.*time) + M(2)*sin(omega0/100.*time));
-Msoln(:,2) = exp(-time./T2).*(M(2)*cos(omega0/100.*time) - M(1)*sin(omega0/100.*time));
+Msoln(:,1) = exp(-time./T2).*(M(1)*cos(omega0/10.*time) + M(2)*sin(omega0/10.*time));
+Msoln(:,2) = exp(-time./T2).*(M(2)*cos(omega0/10.*time) - M(1)*sin(omega0/10.*time));
 Msoln(:,3) = M(3)*exp(-time./T1) + 1*(1-exp(-time./T1));
 
 plot3(Msoln(:,1),Msoln(:,2),Msoln(:,3))

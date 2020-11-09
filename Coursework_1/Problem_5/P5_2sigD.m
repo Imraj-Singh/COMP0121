@@ -8,7 +8,8 @@ clear
 
 % Prescribe T1
 T2 = 1;
-
+T1 = T2 * 2;
+deltaomega = 0;
 
 Onum = 100;
 tsamp = 1001;
@@ -23,11 +24,11 @@ time3 = linspace(.5, 3, (tsamp*3-1));
 
     
 
-video = VideoWriter(['5_1sig', '.mp4'], 'MPEG-4');
+video = VideoWriter(['5_2sigD', '.mp4'], 'MPEG-4');
 
 % set the frame rate
-frameRate = 2;
-video.set('FrameRate', frameRate);
+frameRate = 0.25;
+video.set('FrameRate', frameRate,'Quality',100);
 
 video.open();
 
@@ -35,9 +36,9 @@ h = figure;
 
 
 
-for z=[1 2 4 8 16 32 64]
-    deltaomega = omega0/100*z;
-    omegaovector = linspace(omega0-deltaomega, omega0+deltaomega, Onum);
+for z=[0 1 2 4 8 16 32 64]
+    delta = omega0/100*z;
+    omegaovector = omega0+deltaomega+delta*tan(pi*(rand(Onum,1)-1/2));
     
     for i=1:tsamp
         signal(i,:) = exp(-time(i)/T2)*sin(omegaovector*time(i));
@@ -55,7 +56,7 @@ for z=[1 2 4 8 16 32 64]
     plot(FinalTime,FinalSignal/Onum)
     hold on
     plot(FinalTime,exp(-FinalTime/T2))
-    title(['$\delta \omega = $', num2str(deltaomega)], "interpreter", "latex", "fontsize", 15)
+    title(['$\Delta = $', num2str(delta/omega0),'$\omega$'], "interpreter", "latex", "fontsize", 15)
     grid on
     box on
     xlim([0 3]);
@@ -69,5 +70,4 @@ for z=[1 2 4 8 16 32 64]
 end
 
 video.close();
-
 

@@ -20,7 +20,7 @@ omega0 = 50 * pi;
 deltaomega = omega0*.08;
 omegaovector = linspace(omega0-deltaomega, omega0+deltaomega, 10);%ones(10,1)*omega0 + rand(10,1)*deltaomega*2 - 1;
 
-dt = 0.005;
+dt = 0.01;
 
 % Flip time 1
 FT_1 = .25;

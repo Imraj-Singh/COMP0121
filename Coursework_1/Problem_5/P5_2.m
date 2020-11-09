@@ -16,18 +16,14 @@ gamma = 2.68*10^8;
 T2 = 1;
 T1 = T2 * 2;
 
-% Flip angle
-dtheta = 90 * pi / 180;
 
 % Calculate neccessary parameters
 
 % Precession frequency
-omega0 = 1 * 2 * pi;
-deltaomega = omega0/100;
-delta = .01;
-omegaovector = omega0+deltaomega+delta*tan(pi*(rand(20,1)-1/2));
-%Probability = 1/(pi*delta + pi*(omega-omega0)^2/delta);
-%linspace(omega0-deltaomega, omega0+deltaomega, 10);%ones(10,1)*omega0 + rand(10,1)*deltaomega*2 - 1;
+omega0 = 2 * 2 * pi;
+deltaomega = 0;%omega0/100;
+delta = .1;
+omegaovector = omega0+deltaomega+delta*tan(pi*(rand(100,1)-1/2));
 
 % Define modelling parameters
 RFPulse = 1;
@@ -126,7 +122,7 @@ for i = 1:length(omegaovector)
 end
 %% Animation module
 
-video = VideoWriter(['7_2', '.mp4'], 'MPEG-4');
+video = VideoWriter(['5_2', '.mp4'], 'MPEG-4');
 
 % set the frame rate
 frameRate = 1/dt;
@@ -135,8 +131,6 @@ video.set('FrameRate', frameRate);
 video.open();
 
 h = figure;
-frame = getframe(h);
-video.writeVideo(frame);
 
 for i=1:length(time)
     quiver3(0,0,0,Msoln(i,1,1),Msoln(i,2,1),Msoln(i,3,1),'linewidth',5,'LineStyle','-','Color','r')

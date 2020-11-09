@@ -70,13 +70,13 @@ time = 0:dt:(FT_1 + DP_1 + FT_2 + RP + Echo + DP_2);
 
 % Indices
 % Flip time 1
-FT_1i = FT_1/dt+1;
+FTi_1 = FT_1/dt+1;
 
 % Dephase time 1
-DP_1i = (FT_1+DP_1)/dt+1;
+DPi_1 = (FT_1+DP_1)/dt+1;
 
 % Flip time 2
-FT_2i = (FT_1+DP_1+FT_2)/dt+1;
+FTi_2 = (FT_1+DP_1+FT_2)/dt+1;
 
 % Rephase time
 RPi = (FT_1+DP_1+FT_2+RP)/dt+1;
@@ -96,27 +96,27 @@ Msoln = zeros(length(time),3, length(omegaovector));
 for i = 1:length(omegaovector)
     % Flip time 1
     M = [0, 0, 1]';
-    Msoln(1:FT_1i,1,i) = M(1);
-    Msoln(1:FT_1i,2,i) = M(2);
-    Msoln(1:FT_1i,3,i) = M(3);
+    Msoln(1:FTi_1,1,i) = M(1);
+    Msoln(1:FTi_1,2,i) = M(2);
+    Msoln(1:FTi_1,3,i) = M(3);
 
     % Dephase time 1
     M = [0, 1, 0]';
-    Msoln(FT_1i:DP_1i,1,i) = (M(1)*cos((omega0-omegaovector(i)).*timeP) + M(2)*sin((omega0-omegaovector(i)).*timeP));
-    Msoln(FT_1i:DP_1i,2,i) = (M(2)*cos((omega0-omegaovector(i)).*timeP) - M(1)*sin((omega0-omegaovector(i)).*timeP));%.*exp(-timeRelax./T2);
-    Msoln(FT_1i:DP_1i,3,i) = M(3);
+    Msoln(FTi_1:DPi_1,1,i) = (M(1)*cos((omega0-omegaovector(i)).*timeP) + M(2)*sin((omega0-omegaovector(i)).*timeP));
+    Msoln(FTi_1:DPi_1,2,i) = (M(2)*cos((omega0-omegaovector(i)).*timeP) - M(1)*sin((omega0-omegaovector(i)).*timeP));%.*exp(-timeRelax./T2);
+    Msoln(FTi_1:DPi_1,3,i) = M(3);
 
     % Flip time 2
-    M = Msoln(DP_1i,:,i);
-    DP_1i = (FT_1+DP_1)/dt+1;
-    Msoln(DP_1i:FT_2i,1,i) = M(1);
-    Msoln(DP_1i:FT_2i,2,i) = M(2);
-    Msoln(DP_1i:FT_2i,3,i) = M(3);
+    M = Msoln(DPi_1,:,i);
+    DPi_1 = (FT_1+DP_1)/dt+1;
+    Msoln(DPi_1:FTi_2,1,i) = M(1);
+    Msoln(DPi_1:FTi_2,2,i) = M(2);
+    Msoln(DPi_1:FTi_2,3,i) = M(3);
 
     % Rephase time
-    Msoln(FT_2i:RPi,1,i) = (-M(1))*cos((omega0-omegaovector(i)).*timeP) + M(2)*sin((omega0-omegaovector(i)).*timeP);
-    Msoln(FT_2i:RPi,2,i) = M(2)*cos((omega0-omegaovector(i)).*timeP) + M(1)*sin((omega0-omegaovector(i)).*timeP);%.*exp(-timeRelax./T2);
-    Msoln(FT_2i:RPi,3,i) = M(3);
+    Msoln(FTi_2:RPi,1,i) = (-M(1))*cos((omega0-omegaovector(i)).*timeP) + M(2)*sin((omega0-omegaovector(i)).*timeP);
+    Msoln(FTi_2:RPi,2,i) = M(2)*cos((omega0-omegaovector(i)).*timeP) + M(1)*sin((omega0-omegaovector(i)).*timeP);%.*exp(-timeRelax./T2);
+    Msoln(FTi_2:RPi,3,i) = M(3);
 
     % Echo time
     M = Msoln(RPi,:,i);
@@ -134,7 +134,7 @@ for i = 1:length(omegaovector)
 end
 %% Animation module
 
-video = VideoWriter(['7_2', '.mp4'], 'MPEG-4');
+video = VideoWriter(['5_1', '.mp4'], 'MPEG-4');
 
 % set the frame rate
 frameRate = 1/dt;
@@ -143,8 +143,6 @@ video.set('FrameRate', frameRate);
 video.open();
 
 h = figure;
-frame = getframe(h);
-video.writeVideo(frame);
 
 for i=1:length(time)
     quiver3(0,0,0,Msoln(i,1,1),Msoln(i,2,1),Msoln(i,3,1),'linewidth',5,'LineStyle','-','Color','r')

@@ -28,6 +28,6 @@ box on
 xlim([0 max(time)]);
 ylim([0 0.6]);
 xlabel("Time", "interpreter", "latex", "fontsize", 15)
-ylabel("$\mid M_{\perp} \mid$", "interpreter", "latex", "fontsize", 15)
-legend("$T_I = T_1 \ln(2)$","$T_I = 2.5$","$T_I = 0.5$", "interpreter", "latex", "fontsize", 15)
+ylabel("Signal", "interpreter", "latex", "fontsize", 15)#
+legend(
 hold off

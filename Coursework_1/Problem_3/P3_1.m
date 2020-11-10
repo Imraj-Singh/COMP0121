@@ -19,8 +19,8 @@ T1 = T2 * 2;
 omega0 = 2 * 2 * pi;
 
 % End time
-t = 6;
-resolution = 50;
+t = 4;
+resolution = 100;
 
 % Duration and timestep of model
 time = linspace(0, t, t * resolution + 1);
@@ -38,8 +38,8 @@ Msoln(:,3) = M(3);
 % initialise the video
 video = VideoWriter(['3_1', '.mp4'], 'MPEG-4');
 
-% set the frame rate
-frameRate = resolution;
+% set the frame rate quarter of real speed
+frameRate = resolution/4;
 video.set('FrameRate', frameRate);
 
 video.open();
@@ -49,13 +49,13 @@ h = figure;
 
 % specify animation captures each degree of rotation
 for i=1:length(time)
-    quiver3(0,0,0,Msoln(i,1),Msoln(i,2),Msoln(i,3),'linewidth',4,'LineStyle','-','Color','r')
-    hold on
-    plot3(Msoln(1:i-1,1),Msoln(1:i-1,2),Msoln(1:i-1,3),'k--','linewidth',2)
+    subplot(2,2,1)
     quiver3(0,0,0,0,1,0,'linewidth',2,'LineStyle','--','Color','k')
+    hold on
+    plot3(Msoln(1:i,1),Msoln(1:i,2),Msoln(1:i,3),'k--','linewidth',2)
+    quiver3(0,0,0,Msoln(i,1),Msoln(i,2),Msoln(i,3),'linewidth',4,'LineStyle','-','Color','r')
 
-    % format title, legend, labels, limits, grid and box
-    title(['Time: ', num2str(time(i)),' s'], "interpreter", "latex", "fontsize", 15)
+    % format legend, labels, limits, grid and box
     xlabel("$M_x$", "interpreter", "latex", "fontsize", 15)
     ylabel("$M_y$", "interpreter", "latex", "fontsize", 15)
     zlabel("$M_z$", "interpreter", "latex", "fontsize", 15)
@@ -64,7 +64,43 @@ for i=1:length(time)
     xlim([-1 1]);
     ylim([-1 1]);
     zlim([0 1]);
+    view(3)
     hold off
+    
+    subplot(2,2,2)
+    quiver3(0,0,0,Msoln(i,1),Msoln(i,2),Msoln(i,3),'linewidth',4,'LineStyle','-','Color','r')
+    hold on
+    plot3(Msoln(1:i,1),Msoln(1:i,2),Msoln(1:i,3),'k--','linewidth',2)
+    quiver3(0,0,0,0,1,0,'linewidth',2,'LineStyle','--','Color','k')
+    
+    % format legend, labels, limits, grid and box
+    xlabel("$M_x$", "interpreter", "latex", "fontsize", 15)
+    ylabel("$M_y$", "interpreter", "latex", "fontsize", 15)
+    zlabel("$M_z$", "interpreter", "latex", "fontsize", 15)
+    grid on
+    box on
+    xlim([-1 1]);
+    ylim([-1 1]);
+    zlim([0 1]);
+    view(2)
+    hold off
+    
+    subplot(2,2,3:4)
+    plot(time(1:i),Msoln(1:i,1),'linewidth',2,'LineStyle','-','Color','r');
+    hold on
+    plot(time(1:i),Msoln(1:i,2),'linewidth',2,'LineStyle','-.','Color','b');
+    
+    % format title, legend, labels, limits, grid and box
+    title(['Time: ', num2str(time(i)),' s'], "interpreter", "latex", "fontsize", 15)
+    xlabel("Time (s)", "interpreter", "latex", "fontsize", 15)
+    ylabel("Magnetisation", "interpreter", "latex", "fontsize", 15)
+    legend("$M_{x}$","$M_{y}$", "interpreter", "latex", "fontsize", 10)
+    grid on
+    box on
+    xlim([0 max(time)]);
+    ylim([-1 1]);
+    hold off
+    
     
     % assign frame and write it to the video
     frame = getframe(h);

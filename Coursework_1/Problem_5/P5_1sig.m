@@ -18,7 +18,7 @@ signal = zeros(tsamp,Onum);
 signal2 = zeros(tsamp,Onum);
 signalres = zeros(tsamp,1);
 signalres2 = zeros(tsamp,1);
-time2 = linspace(.5, -2, (tsamp*3-1));
+time2 = linspace(-.5, 2, (tsamp*3-1));
 time3 = linspace(.5, 3, (tsamp*3-1));
 
     

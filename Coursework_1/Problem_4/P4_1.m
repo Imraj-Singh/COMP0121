@@ -2,7 +2,7 @@ clc
 clear
 
 %% Problem 4.1 FID sequence magnetisation vector visualisation
-% Author: Imraj Singh 03/11/2020
+% Author: Imraj Singh 11/11/2020
 
 % Given parameters
 

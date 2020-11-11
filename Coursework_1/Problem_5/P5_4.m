@@ -1,7 +1,7 @@
 clc
 clear
 
-%% Free procession with Dephasing
+%% Hahn echo
 % Author: Imraj Singh 03/11/2020
 
 % Given parameters
@@ -20,8 +20,9 @@ T1 = T2 * 2;
 
 % Precession frequency
 omega0 = 50 * pi;
-deltaomega = 16;
-omegaovector = linspace(-deltaomega,deltaomega,Num);
+deltaomega = 0;
+delta = 2;
+omegaovector = deltaomega+delta*tan(pi*(rand(Num,1)-1/2));
 
 % Inital time 1
 INIT_1 = 0;
@@ -36,7 +37,7 @@ DP_1 = .5;
 tDP_1 = linspace(FT_1, DP_1 + FT_1, N);
 
 % Flip time 2
-FT_2 = .001;
+FT_2 = .002;
 tFT_2 = linspace(DP_1 + FT_1, DP_1 + FT_1 + FT_2, N);
 
 % Rephasing time
@@ -101,10 +102,10 @@ for i = 1:length(omegaovector)
 
     % Flip time 2
     tad = tad - DP_1;
-    Vis90 = pi/FT_2;
+    Vis90 = pi/2/FT_2;
     M = Msoln(DPi_1,:,i);
-    Msoln(DPi_1:FTi_2,1,i) = M(1)*cos(Vis90.*tad(DPi_1:FTi_2)) + M(3)*sin(Vis90.*tad(DPi_1:FTi_2));
-    Msoln(DPi_1:FTi_2,2,i) = M(2);
+    Msoln(DPi_1:FTi_2,1,i) = M(1);
+    Msoln(DPi_1:FTi_2,2,i) = M(2)*cos(Vis90.*tad(DPi_1:FTi_2)) + M(3)*sin(Vis90.*tad(DPi_1:FTi_2));
     Msoln(DPi_1:FTi_2,3,i) = M(3)*cos(Vis90.*tad(DPi_1:FTi_2)) - M(2)*sin(Vis90.*tad(DPi_1:FTi_2));
 
     % Rephase time
@@ -136,7 +137,7 @@ end
 
 %% Animation module
 
-video = VideoWriter(['5_1', '.mp4'], 'MPEG-4');
+video = VideoWriter(['5_4', '.mp4'], 'MPEG-4');
 
 % set the frame rate
 frameRate = N/8;
@@ -233,7 +234,3 @@ for i=INITi_1:length(time)
 end
 
 video.close();
-
-
-
-

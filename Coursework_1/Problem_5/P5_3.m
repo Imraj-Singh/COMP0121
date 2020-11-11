@@ -32,7 +32,7 @@ DP_1 = .5;
 tDP_1 = linspace(FT_1, DP_1 + FT_1, N);
 
 % Flip time 2
-FT_2 = .002;
+FT_2 = .001;
 tFT_2 = linspace(DP_1 + FT_1, DP_1 + FT_1 + FT_2, N);
 
 % Rephasing time
@@ -108,8 +108,8 @@ for Di = 1:length(delta)
         tad = tad - DP_1;
         Vis90 = pi/FT_2;
         M = Msoln(DPi_1,:,i);
-        Msoln(DPi_1:FTi_2,1,i) = M(1)*cos(Vis90.*tad(DPi_1:FTi_2)) + M(3)*sin(Vis90.*tad(DPi_1:FTi_2));
-        Msoln(DPi_1:FTi_2,2,i) = M(2);
+        Msoln(DPi_1:FTi_2,1,i) = M(1);
+        Msoln(DPi_1:FTi_2,2,i) = M(2)*cos(Vis90.*tad(DPi_1:FTi_2)) + M(3)*sin(Vis90.*tad(DPi_1:FTi_2));
         Msoln(DPi_1:FTi_2,3,i) = M(3)*cos(Vis90.*tad(DPi_1:FTi_2)) - M(2)*sin(Vis90.*tad(DPi_1:FTi_2));
         
         % Rephase time
@@ -158,7 +158,7 @@ for i=1:length(delta)
     view(2)
     title(['$\delta \omega $ = ', num2str(delta(i))], "interpreter", "latex", "fontsize", 15)
     xlabel("Time (s)", "interpreter", "latex", "fontsize", 15)
-    ylabel("$\mid \sum M_{\perp} \mid$", "interpreter", "latex", "fontsize", 15)
+    ylabel("$\mid \frac{1}{N} \sum M_{\perp} \mid$", "interpreter", "latex", "fontsize", 15)
     
     frame = getframe(h);
     video.writeVideo(frame);
@@ -203,8 +203,8 @@ for Di = 1:length(delta)
         tad = tad - DP_1;
         Vis90 = pi/FT_2;
         M = Msoln(DPi_1,:,i);
-        Msoln(DPi_1:FTi_2,1,i) = M(1)*cos(Vis90.*tad(DPi_1:FTi_2)) + M(3)*sin(Vis90.*tad(DPi_1:FTi_2));
-        Msoln(DPi_1:FTi_2,2,i) = M(2);
+        Msoln(DPi_1:FTi_2,1,i) = M(1);
+        Msoln(DPi_1:FTi_2,2,i) = M(2)*cos(Vis90.*tad(DPi_1:FTi_2)) + M(3)*sin(Vis90.*tad(DPi_1:FTi_2));
         Msoln(DPi_1:FTi_2,3,i) = M(3)*cos(Vis90.*tad(DPi_1:FTi_2)) - M(2)*sin(Vis90.*tad(DPi_1:FTi_2));
         
         % Rephase time
@@ -245,7 +245,7 @@ for i=1:length(delta)
     view(2)
     title(['$\Delta $ = ', num2str(delta(i))], "interpreter", "latex", "fontsize", 15)
     xlabel("Time (s)", "interpreter", "latex", "fontsize", 15)
-    ylabel("$\mid \sum M_{\perp} \mid$", "interpreter", "latex", "fontsize", 15)
+    ylabel("$\mid \frac{1}{N} \sum M_{\perp} \mid$", "interpreter", "latex", "fontsize", 15)
     
     frame(i) = getframe(h);
 end
@@ -293,8 +293,8 @@ for Di = 1:length(delta)
         tad = tad - DP_1;
         Vis90 = pi/FT_2;
         M = Msoln(DPi_1,:,i);
-        Msoln(DPi_1:FTi_2,1,i) = M(1)*cos(Vis90.*tad(DPi_1:FTi_2)) + M(3)*sin(Vis90.*tad(DPi_1:FTi_2));
-        Msoln(DPi_1:FTi_2,2,i) = M(2);
+        Msoln(DPi_1:FTi_2,1,i) = M(1);
+        Msoln(DPi_1:FTi_2,2,i) = M(2)*cos(Vis90.*tad(DPi_1:FTi_2)) + M(3)*sin(Vis90.*tad(DPi_1:FTi_2));
         Msoln(DPi_1:FTi_2,3,i) = M(3)*cos(Vis90.*tad(DPi_1:FTi_2)) - M(2)*sin(Vis90.*tad(DPi_1:FTi_2));
         
         % Rephase time
@@ -338,7 +338,7 @@ for i=1:length(delta)
     view(2)
     title(['$\omega_0 $ = ', num2str(delta(i))], "interpreter", "latex", "fontsize", 15)
     xlabel("Time (s)", "interpreter", "latex", "fontsize", 15)
-    ylabel("$\mid \sum M_{\perp} \mid$", "interpreter", "latex", "fontsize", 15)
+    ylabel("$\mid \frac{1}{N} \sum M_{\perp} \mid$", "interpreter", "latex", "fontsize", 15)
     frame(i) = getframe(gcf);
 end
 video = VideoWriter(['5_3_omega', '.mp4'], 'MPEG-4');

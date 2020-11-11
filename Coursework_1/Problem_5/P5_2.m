@@ -21,7 +21,7 @@ T1 = T2 * 2;
 % Precession frequency
 omega0 = 50 * pi;
 deltaomega = 0;
-delta = 5;
+delta = 8;
 omegaovector = deltaomega+delta*tan(pi*(rand(Num,1)-1/2));
 
 % Inital time 1
@@ -37,7 +37,7 @@ DP_1 = .5;
 tDP_1 = linspace(FT_1, DP_1 + FT_1, N);
 
 % Flip time 2
-FT_2 = .002;
+FT_2 = .001;
 tFT_2 = linspace(DP_1 + FT_1, DP_1 + FT_1 + FT_2, N);
 
 % Rephasing time
@@ -196,7 +196,7 @@ for i=INITi_1:length(time)
     xlim([0 max(time)]);
     xlabel("Time (s)", "interpreter", "latex", "fontsize", 15)
     ylabel("Normalised signal", "interpreter", "latex", "fontsize", 15)
-    legend("$\mid \sum M_{\perp} \mid$","$T_2$ envelope", "interpreter", "latex", "fontsize", 10)
+    legend("$\mid \frac{1}{N} \sum M_{\perp} \mid$","$T_2$ envelope", "interpreter", "latex", "fontsize", 10)
     
     % Initial
     if i > 0 && i <= INITi_1

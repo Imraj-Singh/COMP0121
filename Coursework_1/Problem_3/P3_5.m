@@ -37,7 +37,7 @@ Msoln(:,3) = M(3)*exp(-time./T1) + M0(3)*(1-exp(-time./T1));
 % Author: Imraj Singh 03/11/2020
 
 % initialise the video
-video = VideoWriter(['3_4', '.mp4'], 'MPEG-4');
+video = VideoWriter(['3_5', '.mp4'], 'MPEG-4');
 
 % set the frame rate
 frameRate = resolution/4;

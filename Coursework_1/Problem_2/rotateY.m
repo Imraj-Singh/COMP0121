@@ -1,7 +1,7 @@
 function [rotated] = rotateY(vector,theta)
-%Rotate around z-axis
+%Rotate around y-axis
 %   vector - the vector you want rotated, must have three dimensions
-%   theta - angle in radians to rotate the vector around the z-axis
+%   theta - angle in radians to rotate the vector around the y-axis
 %   clockwise
 %   
 

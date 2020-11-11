@@ -12,7 +12,7 @@ function SE = calcSE(T,B, Gamma)
 
 % Number of spins calculated from typical voxel volume 2*2*5mm = 0.02
 % Avogadro's number = 6.02*10^23
-% One voxel has 2 x 6.02 x1023 x 0.02 / 18 protons
+% One voxel has 2 x 6.02 x10^23 x 0.02 / 18 protons
 N = 1.338 * 10^21;
 
 % Reduced planks constant

@@ -3,7 +3,7 @@ clc
 clear
 
 %% Rotation around the z-axis - visualisation
-% Author - Imraj
+% Author - Imraj 11/11/2020
 
 % initialise the video
 video = VideoWriter(['2_1', '.mp4'], 'MPEG-4');

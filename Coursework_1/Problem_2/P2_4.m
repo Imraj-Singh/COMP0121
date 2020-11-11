@@ -37,8 +37,7 @@ Msoln(:,1) = M(1);
 Msoln(:,2) = M(2)*cos(omega1.*time) + M(3)*sin(omega1.*time);
 Msoln(:,3) = M(3)*cos(omega1.*time) - M(2)*sin(omega1.*time);
 
-%% Animation module
-% Author: Imraj Singh 03/11/2020
+%% Animation
 
 % initialise the video
 video = VideoWriter(['2_4', '.mp4'], 'MPEG-4');

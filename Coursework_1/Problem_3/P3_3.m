@@ -31,14 +31,13 @@ Msoln(:,2) = exp(-time./T2).*M(2);
 Msoln(:,3) = M(3)*exp(-time./T1) + M0(3)*(1-exp(-time./T1));
 
 
-%% Animation module
-% Author: Imraj Singh 03/11/2020
+%% Animation
 
 % initialise the video
 video = VideoWriter(['3_3', '.mp4'], 'MPEG-4');
 
 % set the frame rate
-frameRate = resolution;
+frameRate = resolution/4;
 video.set('FrameRate', frameRate);
 
 video.open();

@@ -2,7 +2,7 @@
 clc
 clear
 %% Free procession ignoring relaxation
-% Author: Imraj Singh 03/11/2020
+% Author: Imraj Singh 11/11/2020
 
 % Given parameters
 % Magnitisation aligned along y-axis initially

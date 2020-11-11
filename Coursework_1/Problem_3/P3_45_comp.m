@@ -44,7 +44,7 @@ Msolns(:,3) = M(3)*exp(-time./T1) + M0(3)*(1-exp(-time./T1));
 video = VideoWriter(['3_45_comp', '.mp4'], 'MPEG-4');
 
 % set the frame rate
-frameRate = resolution;
+frameRate = resolution/4;
 video.set('FrameRate', frameRate);
 
 video.open();

@@ -40,7 +40,7 @@ Msoln(:,3) = M(3)*exp(-time./T1) + M0(3)*(1-exp(-time./T1));
 video = VideoWriter(['3_4', '.mp4'], 'MPEG-4');
 
 % set the frame rate
-frameRate = resolution;
+frameRate = resolution/4;
 video.set('FrameRate', frameRate);
 
 video.open();
@@ -104,47 +104,6 @@ for i=1:length(time)
     hold off
     
     
-    % assign frame and write it to the video
-    frame = getframe(h);
-    video.writeVideo(frame);
-end
-
-video.close();
-
-%% Animation module - just the 3D
-% Author: Imraj Singh 03/11/2020
-
-% initialise the video
-video = VideoWriter(['3_4_3D', '.mp4'], 'MPEG-4');
-
-% set the frame rate
-frameRate = resolution;
-video.set('FrameRate', frameRate);
-
-video.open();
-
-% initialise the figure
-h = figure;
-
-% specify animation captures each degree of rotation
-for i=1:length(time)
-    quiver3(0,0,0,0,1,0,'linewidth',2,'LineStyle','--','Color','k')
-    hold on
-    plot3(Msoln(1:i,1),Msoln(1:i,2),Msoln(1:i,3),'k--','linewidth',2)
-    quiver3(0,0,0,Msoln(i,1),Msoln(i,2),Msoln(i,3),'linewidth',4,'LineStyle','-','Color','r')
-
-    % format title, legend, labels, limits, grid and box
-    title(['Time: ', num2str(time(i)),' s'], "interpreter", "latex", "fontsize", 15)
-    xlabel("$M_{x'}$", "interpreter", "latex", "fontsize", 15)
-    ylabel("$M_{y'}$", "interpreter", "latex", "fontsize", 15)
-    zlabel("$M_{z'}$", "interpreter", "latex", "fontsize", 15)
-    grid on
-    box on
-    xlim([-1 1]);
-    ylim([-1 1]);
-    zlim([0 1]);
-    view(3)
-    hold off
     % assign frame and write it to the video
     frame = getframe(h);
     video.writeVideo(frame);

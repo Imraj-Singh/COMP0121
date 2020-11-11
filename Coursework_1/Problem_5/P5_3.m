@@ -1,0 +1,3 @@
+% house keeping
+clc
+clear

@@ -7,10 +7,10 @@ clear
 % Given parameters
 
 % Number of sample in each part of sequence
-N = 101;
+N = 11;
 
 % Number of isochromats
-Num = 1001;
+Num = 11;
 
 % Prescribe T1
 T2 = 1;
@@ -32,7 +32,7 @@ FT_1 = .001;
 tFT_1 = linspace(0, FT_1, N);
 
 % Dephasing time 1
-DP_1 = .5;
+DP_1 = 0.25;
 tDP_1 = linspace(FT_1, DP_1 + FT_1, N);
 
 % Flip time 2
@@ -48,7 +48,7 @@ INIT_2 = 0;
 tINIT_2 = linspace(DP_1 + FT_1 + FT_2 + RP,  DP_1 + FT_1 + FT_2 + RP, N);
 
 % Dephasing time 2
-DP_2 = DP_1;
+DP_2 = 0.5;
 tDP_2 = linspace(DP_1 + FT_1 + FT_2 + RP, + DP_1 + FT_1 + FT_2 + RP + DP_2, N);
 
 time = [tINIT_1, tFT_1, tDP_1, tFT_2, tRP, tINIT_2, tDP_2];
@@ -131,7 +131,7 @@ for i = 1:length(omegaovector)
 end
 Mperp = zeros(length(time),1);
 for i=1:length(time)
-    Mperp(i) = exp(-time(i)/T2)*sqrt(sum(Msoln(i,1,:))^2 + sum(Msoln(i,2,:))^2)/Num;
+    Mperp(i) = sqrt(sum(Msoln(i,1,:))^2 + sum(Msoln(i,2,:))^2)/Num;
 end
 
 %% Animation module
@@ -139,7 +139,7 @@ end
 video = VideoWriter(['5_1', '.mp4'], 'MPEG-4');
 
 % set the frame rate
-frameRate = N/8;
+frameRate = N/2;
 video.set('FrameRate', frameRate);
 
 video.open();
@@ -152,7 +152,7 @@ for i=INITi_1:length(time)
     
     quiver3(0,0,0,Msoln(i,1,1),Msoln(i,2,1),Msoln(i,3,1),'linewidth',5,'LineStyle','-','Color','r')
     hold on
-    for j=1:100:length(omegaovector)
+    for j=2:length(omegaovector)
         quiver3(0,0,0,Msoln(i,1,j),Msoln(i,2,j),Msoln(i,3,j),'linewidth',5,'LineStyle','-','Color','r')
     end
     grid on
@@ -168,7 +168,7 @@ for i=INITi_1:length(time)
     subplot(2,2,2)
     quiver3(0,0,0,Msoln(i,1,1),Msoln(i,2,1),Msoln(i,3,1),'linewidth',5,'LineStyle','-','Color','r')
     hold on
-    for j=1:100:length(omegaovector)
+    for j=2:length(omegaovector)
         quiver3(0,0,0,Msoln(i,1,j),Msoln(i,2,j),Msoln(i,3,j),'linewidth',5,'LineStyle','-','Color','r')
     end
     grid on
@@ -186,16 +186,14 @@ for i=INITi_1:length(time)
     subplot(2,2,3:4)
     
     plot(time(1:i),Mperp(1:i),'linewidth',2,'LineStyle','-','Color','k')
-    hold on
-    plot(time(:),exp(-time(:)/T2),'linewidth',2,'LineStyle','--','Color','k')
-    hold off
+    
     grid on
     box on
     ylim([0 1]);
     xlim([0 max(time)]);
     xlabel("Time (s)", "interpreter", "latex", "fontsize", 15)
-    ylabel("Normalised signal", "interpreter", "latex", "fontsize", 15)
-    legend("$\mid \sum M_{\perp} \mid$","$T_2$ envelope", "interpreter", "latex", "fontsize", 10)
+    ylabel("$\mid \sum M_{\perp} \mid$", "interpreter", "latex", "fontsize", 15)
+    
     
     % Initial
     if i > 0 && i <= INITi_1
@@ -208,23 +206,23 @@ for i=INITi_1:length(time)
         
         % First Dephase
     elseif i > FTi_1 && i <= DPi_1
-        title(['Isocromats dephasing, t = ', num2str(round(time(i) - INIT_1 - FT_1, 3)),' s'], "interpreter", "latex", "fontsize", 15)
+        title(['First dephase, t = ', num2str(round(time(i) - INIT_1 - FT_1, 3)),' s'], "interpreter", "latex", "fontsize", 15)
         
         % Second flip
     elseif i > DPi_1 && i <= FTi_2
-        title(['RF pulse $\pi$, $t = \tau$ = ', num2str(round(DP_1, 3)),' s'], "interpreter", "latex", "fontsize", 15)
+        title(['RF pulse $\pi$, $t = \tau$ ', num2str(round(DP_1, 3)),' s'], "interpreter", "latex", "fontsize", 15)
     
         % Rephasing
     elseif i > FTi_2 && i <= RPi
-        title(['Isocromats rephasing, $t =$ ', num2str(round(time(i) - INIT_1 - FT_1 - FT_2, 3)),' s (Relaxation)'], "interpreter", "latex", "fontsize", 15)
+        title(['Isocromats rephasing,  ', num2str(round(time(i) - INIT_1 - FT_1, 3)),' s (Relaxation)'], "interpreter", "latex", "fontsize", 15)
         
         % Echo
     elseif i > RPi && i <= INITi_2
-        title(['Echo time, $t = T_E = 2 \tau =$ ',num2str(round(DP_1 * 2, 3)),' s'], "interpreter", "latex", "fontsize", 15)
+        title(['Echo time ($T_E = 2 \tau$)',num2str(round(1000*(time(i) - FT_1 - DP_1), 3)),' ms'], "interpreter", "latex", "fontsize", 15)
         
         % Dephasing
     elseif i > INITi_2 && i <= DPi_2
-        title(['Isocromats dephasing, $t =$ ', num2str(round(time(i) - INIT_1 - FT_1 - FT_2, 3)),' s (Relaxation)'], "interpreter", "latex", "fontsize", 15)
+        title(['Time from $\pi / 2$ flip: ', num2str(round(time(i) - INIT_1 - FT_1 - DP_1 - FT_2, 3)),' s (Relaxation)'], "interpreter", "latex", "fontsize", 15)
         
     end 
     

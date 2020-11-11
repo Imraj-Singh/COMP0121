@@ -7,7 +7,7 @@ clear
 % Given parameters
 
 % Number of sample in each part of sequence
-N = 11;
+N = 101;
 
 % Number of isochromats
 Num = 1001;

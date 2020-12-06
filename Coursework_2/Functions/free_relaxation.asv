@@ -6,14 +6,14 @@ omega = gamma*iso.B0 + (Gx*iso.x + Gy*iso.y) * gamma / (2*pi);
 omega = omega - R_FoR;
 t_Relax = linspace(sum(relax(1:(end-1))),sum(relax),N)';
 
-M_x_begin = iso.Mx(end)/exp(-t_Relax(1)/T2);
-M_y_begin = iso.My(end)/exp(-t_Relax(1)/T2);
+M_x_begin = iso.Mx(end)/exp(-t_Relax(1)/T1);
+M_y_begin = iso.My(end)/exp(-t_Relax(1)/T1);
 M_z_begin = (iso.Mz(end)-(1-exp(-t_Relax(1)/T1)))/exp(-t_Relax(1)/T1);
 t = linspace(0,T,N)';
 
 
-M_x = (M_x_begin.*cos(omega*t) + M_y_begin.*sin(omega*t)).*exp(-t_Relax/T2);
-M_y = (M_y_begin.*cos(omega*t) - M_x_begin.*sin(omega*t)).*exp(-t_Relax/T2);
+M_x = (iso.Mx(end).*cos(omega*t) + iso.My(end).*sin(omega*t)).*exp(-t_Relax/T2);
+M_y = (iso.My(end).*cos(omega*t) - iso.Mx(end).*sin(omega*t)).*exp(-t_Relax/T2);
 M_z = M_z_begin*exp(-t_Relax/T1) + (1-exp(-t_Relax./T1));
 
 iso.Mx = [iso.Mx; M_x];

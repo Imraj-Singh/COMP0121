@@ -1,12 +1,12 @@
-%% Free procession with Dephasing
-% Author: Imraj Singh 03/11/2020
+%% Problem 1: Experiment 1 free precession
+% Author: Imraj Singh 08/11/2020
 
 clc
 clear
 close all
 
-% Add the path what holds functions
-addpath(genpath('.../Functions'))
+% Add the path that holds functions
+addpath(genpath('..\Functions'))
 
 %% Define coordinate position of each isochromat
 
@@ -34,14 +34,14 @@ gamma = 2.68*10^8;
 
 % Initalise the isochromats, setting the X, Y cooridates and instantiating
 % the Mx, My, Mz fields of the structures
-iso = initalise_iso(X, Y);
+iso = initialise_iso(X, Y);
 
 % B0
 B0 = 3;
 
 % Initalise the B0 this is done such that arbitrary perturbation can be
 % added to the B0 field to simulate field inhomogenities
-iso = initalise_B0(iso, B0);
+iso = initialise_B0(iso, B0);
 
 % Larmor frequency of rotating frame of reference
 R_FoR = B0*gamma;
@@ -61,10 +61,10 @@ T2 = .1;
 % 0.32ms
 
 % [Set the number of points to be calculated minimum of 2 for each block
-blocks.N = [3 11 11 101];
+blocks.N = [11 101 257 151];
 
 % Time over which the block occurs
-blocks.t = [0 .32 5.12 512]/1000;
+blocks.t = [0 .32 5.12 4994.88]/1000;
 
 % The gradient of the field dB/dx for each block
 blocks.Gx = [0 0 0 0]/1000;
@@ -73,7 +73,7 @@ blocks.Gx = [0 0 0 0]/1000;
 blocks.Gy = [0 0 0 0]/1000;
 
 % The relaxation time only when spins are relaxation
-blocks.relax = [0 0 5.12 512]/1000;
+blocks.relax = [0 0 5.12 4994.88]/1000;
 
 % Initialise the Mx, My, Mz values that stores the sum of all the spins
 % magnetisation
@@ -116,76 +116,124 @@ Time = unroll_time(blocks.N,blocks.t);
 
 %% Animation module
 
+% Normalisation constants used for plotting the quiver3s
 norm = 0.001;
 norm_scale = 2;
 
+% Create circular colour map
 cmap = colormap(hsv(360));
+
+% Set the video writing name and location
+video = VideoWriter(['P1_E1', '.mp4'], 'MPEG-4');
+
+% Set the frame rate of video
+frameRate = 50;
+video.set('FrameRate', frameRate);
+
+% Open the video
+video.open();
+
+% Open a figure that has frame recorded
+h = figure;
+
 for i=1:length(Time)
+    % First subplot
     subplot(2,2,1)
-    h = quiver3(iso(1).x,iso(1).y,0,iso(1).Mx(i)*norm,iso(1).My(i)*norm,iso(1).Mz(i)*norm,'linewidth',2,'LineStyle','-');
-    alpha = atan2(iso(1).My(i)*norm, iso(1).Mx(i)*norm);
+    % First element of vector of iso structs
+    quiv = quiver3(iso(1).x,iso(1).y,0,iso(1).Mx(i)*norm,iso(1).My(i)*norm,iso(1).Mz(i)*norm,'linewidth',2,'LineStyle','-','Color','k');
+    % Calculate the angle of the spin from the positive y'-axis clockwise
+    alpha = atan2(iso(1).My(i), iso(1).Mx(i));
+    % Convert the angle to degrees and round
     idx = ceil(rad2deg(alpha));
-    if idx < 1 % negative indices and 0 are invalid
+    % If the degree are negative/zero then invalid and add 360 degrees
+    if idx < 1
         idx = idx + 360;
     end
-    set(h, 'Color', cmap(idx,:)) % before, change each quiver command to h = quiver(...)
+    % Set the colour of the quiver according to the colour map
+    set(quiv, 'Color', cmap(idx,:))
     hold on
     
-    for z=1:length(iso)
-        h = quiver3(iso(z).x,iso(z).y,0,iso(z).Mx(i)*norm,iso(z).My(i)*norm,iso(z).Mz(i)*norm,'linewidth',2,'LineStyle','-');
-        alpha = atan2(iso(z).My(i)*norm, iso(z).Mx(i)*norm);
+    for z=2:length(iso)
+        % z'th element of vector of iso structs
+        quiv = quiver3(iso(z).x,iso(z).y,0,iso(z).Mx(i)*norm,iso(z).My(i)*norm,iso(z).Mz(i)*norm,'linewidth',2,'LineStyle','-','Color','k');
+        % Calculate the angle of the spin from the positive y'-axis clockwise
+        alpha = atan2(iso(1).My(i), iso(1).Mx(i));
+        % Convert the angle to degrees and round
         idx = ceil(rad2deg(alpha));
-        if idx < 1 % negative indices and 0 are invalid
+        % If the degree are negative/zero then invalid and add 360 degrees
+        if idx < 1
             idx = idx + 360;
         end
-        set(h, 'Color', cmap(idx,:)) % before, change each quiver command to h = quiver(...)
+        % Set the colour of the quiver according to the colour map
+        set(quiv, 'Color', cmap(idx,:))
+        hold on
     end
     
     grid on
     box on
     hold off
+    % Set the axes limits
     xlim([min(x)-norm*norm_scale max(x)+norm*norm_scale]);
-    %ylim([-norm*norm_scale norm*norm_scale]);
     ylim([min(x)-norm*norm_scale max(x)+norm*norm_scale]);
     zlim([min(x)-norm*norm_scale max(x)+norm*norm_scale]);
-    xlabel("$M_{x'}$", "interpreter", "latex", "fontsize", 10)
-    ylabel("$M_{y'}$", "interpreter", "latex", "fontsize", 10)
-    zlabel("$M_{z'}$", "interpreter", "latex", "fontsize", 10)
+    % Set the axes labels
+    xlabel("$x'$", "interpreter", "latex", "fontsize", 15)
+    ylabel("$y'$", "interpreter", "latex", "fontsize", 15)
+    zlabel("$z'$", "interpreter", "latex", "fontsize", 15)
     
-    h1 = subplot(2,2,3:4);
-    title(['Time: ', num2str(Time(i)*1000), ' ms'])
-    %     plot(h1,Time(1:i),Mx(1:i),'linewidth',1,'LineStyle','-','Color','r')
+    % Second subplot
+    subplot(2,2,2);
+    % Plot the path of the magnetisation vector
+    plot(iso(1).My(1:i),iso(1).Mz(1:i),'linewidth',1,'LineStyle','--','Color','r')
     hold on
-    plot(h1,Time(1:i)*1000,My(1:i),'linewidth',1,'LineStyle','-','Color','b')
-    %     plot(h1,Time(1:i),Mz(1:i),'linewidth',1,'LineStyle','-','Color','k')
+    % Plot the magnetisation vector
+    quiver(0,0,iso(1).My(i),iso(1).Mz(i),'linewidth',2,'LineStyle','-','Color','r')
     grid on
     box on
     hold off
-    if Time(i)<(0+.32+5.12)/1000
-        xlim(h1,[0 (0+.32+5.12)]);
-    else
-        xlim(h1,[0 max(Time)*1000]);
+    % Set the axes limits
+    xlim([-0.2 1.2]);
+    ylim([-0.2 1.2]);
+    % Set the axes labels
+    xlabel("$M_{y'}$", "interpreter", "latex", "fontsize", 15)
+    ylabel("$M_{z'}$", "interpreter", "latex", "fontsize", 15)
+    
+    % Last subplot, double length
+    subplot(2,2,3:4);
+    % Set the title based on what part of the pulse sequence is animated
+    if Time(i)<=(blocks.t(2))
+    title(['Flipping the spins, time: ', num2str(Time(i)*1000), ' ms'], "interpreter", "latex", "fontsize", 15)
+    elseif Time(i)<=(blocks.t(2)+blocks.t(3))
+    title(['Recording signal, time (after flip): ', num2str((Time(i)-blocks.t(2))*1000), ' ms'], "interpreter", "latex", "fontsize", 15)
+    elseif Time(i)>(blocks.t(2)+blocks.t(3))
+    title(['Full relaxation, time (after flip): ', num2str(ceil((Time(i)-blocks.t(2))*1000)), ' ms'], "interpreter", "latex", "fontsize", 15)
     end
-    ylim(h1,[-0.2 1.2]);
-    xlabel(h1,"Time (ms)", "interpreter", "latex", "fontsize", 10)
-    ylabel(h1,"Signal", "interpreter", "latex", "fontsize", 10)
-    
-    h1 = subplot(2,2,2);
-    plot(h1,iso(1).My(1:i),iso(1).Mz(1:i),'linewidth',1,'LineStyle','--','Color','r')
     hold on
-    quiver(h1,0,0,iso(1).My(i),iso(1).Mz(i),'linewidth',2,'LineStyle','-','Color','r')
+    % Plot the y' and z' magnetisation as these are the most important 
+    plot(Time(1:i)*1000,My(1:i),'linewidth',2,'LineStyle','-','Color','b')
+    plot(Time(1:i)*1000,Mz(1:i),'linewidth',2,'LineStyle','-','Color','r')
     grid on
     box on
     hold off
-    legend(h1,'Path','Now', "interpreter", "latex", "fontsize", 10)
-    xlim(h1,[-0.2 1.2]);
-    ylim(h1,[-0.2 1.2]);
-    xlabel(h1,"$M_{y'}$", "interpreter", "latex", "fontsize", 10)
-    ylabel(h1,"$M_{z'}$", "interpreter", "latex", "fontsize", 10)
-    pause(0.01)
+    % Set two different scales to investigate the full relaxation
+    if Time(i)<(blocks.t(2)+blocks.t(3))
+        xlim([0 (blocks.t(2)+blocks.t(3))*1000]);
+    else
+        xlim([0 max(Time)*1000]);
+    end
+    % Add legends, limits, labels
+    legend("$M_{y'}$","$M_{z'}$", "interpreter", "latex", "fontsize", 15)
+    ylim([-0.2 1.2]);
+    xlabel("Time (ms)", "interpreter", "latex", "fontsize", 15)
+    ylabel("Magnetisation", "interpreter", "latex", "fontsize", 15)
+    
+    % Set frame to add to video
+    frame = getframe(h);
+    video.writeVideo(frame);
 end
 
-
+% Close the video
+video.close();
 
 
 

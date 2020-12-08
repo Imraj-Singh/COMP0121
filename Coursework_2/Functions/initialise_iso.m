@@ -1,4 +1,4 @@
-function iso = initalise_iso(x,y)
+function iso = initialise_iso(x,y)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 iso(1:length(x)) = struct();

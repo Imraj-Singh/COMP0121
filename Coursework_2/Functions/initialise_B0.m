@@ -1,4 +1,4 @@
-function iso = initalise_B0(iso,B0)
+function iso = initialise_B0(iso,B0)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 for i=1:length(iso(:,1))

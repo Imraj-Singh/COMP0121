@@ -19,12 +19,6 @@ Numy = 1;
 % Length of segment
 L = 20/1000;
 
-% Sampling time
-Ts = 5.12;
-
-% Sampling time
-Gradient = -4.6;
-
 % Spatial coordinates of isochromats (m)
 x = linspace(-L/2,L/2,Numx);
 y = linspace(0,0,Numy);
@@ -70,19 +64,19 @@ T2 = .1;
 % 0.32ms
 
 % [Set the number of points to be calculated minimum of 2 for each block
-blocks.N = [1 65 129 257];
+blocks.N = [1 65 257];
 
 % Time over which the block occurs
-blocks.t = [0 .32 Ts/2 Ts]/1000;
+blocks.t = [0 .32 5.12]/1000;
 
 % The gradient of the field dB/dx for each block
-blocks.Gx = [0 0 Gradient -Gradient]/1000;
+blocks.Gx = [0 0 -4.6]/1000;
 
 % The gradient of the field dB/dz for each block
-blocks.Gy = [0 0 0 0]/1000;
+blocks.Gy = [0 0 0]/1000;
 
 % The relaxation time only when spins are relaxation
-blocks.relax = [0 0 Ts/2 Ts]/1000;
+blocks.relax = [0 0 5.12]/1000;
 
 % Initialise the Mx, My, Mz values that stores the sum of all the spins
 % magnetisation
@@ -101,10 +95,6 @@ for i=1:length(iso)
     % Free relaxation with gradient
     iso(i) = free_relaxation(iso(i), blocks.N(3), blocks.t(3), ...
         blocks.Gx(3), blocks.Gy(3), blocks.relax(1:3), gamma, T1, T2, R_FoR);
-    
-    % Free relaxation with negative gradient
-    iso(i) = free_relaxation(iso(i), blocks.N(4), blocks.t(4), ...
-        blocks.Gx(4), blocks.Gy(4), blocks.relax(1:4), gamma, T1, T2, R_FoR);
     
     % Add the magnetisations to the total  magnetisation
     Mx = Mx + iso(i).Mx;
@@ -134,7 +124,7 @@ norm_scale = 2;
 cmap = colormap(hsv(360));
 
 % Set the video writing name and location
-video = VideoWriter(['P1_E3', '.mp4'], 'MPEG-4');
+video = VideoWriter(['P1_E2', '.mp4'], 'MPEG-4');
 
 % Set the frame rate of video
 frameRate = 25;
@@ -153,9 +143,7 @@ for i=1:length(Time)
     elseif Time(i)>=sum(blocks.t(1:1)) && Time(i)<=sum(blocks.t(1:2))
     sgtitle(['Flipping the spins, time: ', num2str(Time(i)*1000), ' ms'], "interpreter", "latex", "fontsize", 15)
     elseif Time(i)>sum(blocks.t(1:2)) && Time(i)<=sum(blocks.t(1:3))
-    sgtitle(['Dephasing lobe, time (after flip): ', num2str((Time(i)-blocks.t(2))*1000), ' ms'], "interpreter", "latex", "fontsize", 15)
-    elseif Time(i)>sum(blocks.t(1:3)) && Time(i)<=sum(blocks.t(1:4))
-    sgtitle(['Recording signal, time (after dephase): ', num2str((Time(i)-blocks.t(2))*1000), ' ms'], "interpreter", "latex", "fontsize", 15)
+    sgtitle(['Recording signal, time (after flip): ', num2str((Time(i)-blocks.t(2))*1000), ' ms'], "interpreter", "latex", "fontsize", 15)
     end
     
     % First subplot - quiver of spin vectors in space
@@ -213,9 +201,9 @@ for i=1:length(Time)
     hold on
     plot(Time(1:i)*1000,My(1:i),'linewidth',1,'LineStyle','-','Color','b')
     % plot the signal points
-    if Time(i)<sum(blocks.t(1:4)) &&  Time(i)>sum(blocks.t(1:3))
-        plot(Time(sum(blocks.N(1:3)):i)*1000,Mx(sum(blocks.N(1:3)):i),'.','MarkerSize',8,'Color','k')
-        plot(Time(sum(blocks.N(1:3)):i)*1000,My(sum(blocks.N(1:3)):i),'.','MarkerSize',8,'Color','k')
+    if Time(i)<sum(blocks.t(1:3)) &&  Time(i)>sum(blocks.t(1:2))
+        plot(Time(sum(blocks.N(1:2)):i)*1000,Mx(sum(blocks.N(1:2)):i),'.','MarkerSize',8,'Color','k')
+        plot(Time(sum(blocks.N(1:2)):i)*1000,My(sum(blocks.N(1:2)):i),'.','MarkerSize',8,'Color','k')
     end
     grid on
     box on

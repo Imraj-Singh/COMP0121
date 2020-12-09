@@ -10,12 +10,6 @@ addpath 'C:\Users\Imraj Singh\Documents\UCL\Comp_MRI\COMP0121\Coursework_2\Funct
 
 %% Define coordinate position of each isochromat
 
-% Number of isochromats x
-Numx = 21;
-
-% Number of isochromats y
-Numy = 1;
-
 % Length of segment
 L = 20/1000;
 
@@ -25,16 +19,29 @@ Ts = 5.12;
 % Sampling time
 Gradient = -4.6;
 
+% Number of isochromats x
+Numx = 101;
+
+% Number of isochromats y
+Numy = 101;
+
 % Spatial coordinates of isochromats (m)
-x = linspace(-L/2,L/2,Numx);
-y = linspace(0,0,Numy);
+x1 = linspace(-L/2,0,Numx);
+y1 = linspace(0,L/2,Numy);
 
 % Create mesh grid of x and y coordinates
-[X, Y] = meshgrid(x,y);
+[X1, Y1] = meshgrid(x1,y1);
+
+% Spatial coordinates of isochromats (m)
+x2 = linspace(0,L/2,Numx);
+y2 = linspace(-L/2,0,Numy);
+
+% Create mesh grid of x and y coordinates
+[X2, Y2] = meshgrid(x2,y2);
 
 % Flatten the array into a vector to make manipulation easier
-X = X(:);
-Y = Y(:);
+X = [X1(:);X2(:)];
+Y = [Y1(:);Y2(:)];
 
 %% Set NMR parameters and initialise isochromat structures
 
@@ -70,7 +77,8 @@ T2 = .1;
 % 0.32ms
 
 % [Set the number of points to be calculated minimum of 2 for each block
-blocks.N = [1 65 129 257];
+%blocks.N = [1 65 129 257];
+blocks.N = [1 11 101 201];
 
 % Time over which the block occurs
 blocks.t = [0 .32 Ts/2 Ts]/1000;
@@ -79,7 +87,7 @@ blocks.t = [0 .32 Ts/2 Ts]/1000;
 blocks.Gx = [0 0 Gradient -Gradient]/1000;
 
 % The gradient of the field dB/dz for each block
-blocks.Gy = [0 0 0 0]/1000;
+blocks.Gy = [0 0 Gradient -Gradient]/1000;
 
 % The relaxation time only when spins are relaxation
 blocks.relax = [0 0 Ts/2 Ts]/1000;
@@ -89,6 +97,9 @@ blocks.relax = [0 0 Ts/2 Ts]/1000;
 Mx = zeros(sum(blocks.N),1);
 My = zeros(sum(blocks.N),1);
 Mz = zeros(sum(blocks.N),1);
+
+map = ones(Numx*2-1,Numy*2-1,sum(blocks.N))*361;
+map(1,1,:) = 0;
 
 % Calculate magnetisation for all the spins
 for i=1:length(iso)
@@ -106,6 +117,13 @@ for i=1:length(iso)
     iso(i) = free_relaxation(iso(i), blocks.N(4), blocks.t(4), ...
         blocks.Gx(4), blocks.Gy(4), blocks.relax(1:4), gamma, T1, T2, R_FoR);
     
+    ix = round((iso(i).x+L/2)/(x1(2)-x1(1)) + 1);
+    iy = round((iso(i).y+L/2)/(y1(2)-y1(1)) + 1);
+    
+    for k=1:sum(blocks.N)
+        map(ix,iy,k) = ceil(mod(atan2(iso(i).My(k), iso(i).Mx(k)),2*pi)/(pi)*180);
+    end
+    
     % Add the magnetisations to the total  magnetisation
     Mx = Mx + iso(i).Mx;
     My = My + iso(i).My;
@@ -122,6 +140,14 @@ Time = unroll_time(blocks.N,blocks.t);
 
 % Calculate the Gx, Gy, kx, ky vectors in time
 [Gx_t, Gy_t, kx, ky] = unroll_plotting(blocks.N,blocks.Gx,blocks.Gy,gamma,Time);
+
+colormap([1 1 1; hsv(360); 0 0 0]);
+for i=1:length(Time)
+imagesc(linspace(-L/2,L/2,Numx*2-1),linspace(-L/2,L/2,Numy*2-1),map(:,:,i))
+set(gca,'YDir','normal')
+pause(0.1)
+
+end
 
 
 %% Animation module

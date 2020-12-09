@@ -2,7 +2,7 @@ function iso = free_relaxation(iso,N,T,Gx,Gy,relax, gamma, T1, T2,R_FoR)
 %UNTITLED4 Summary of this function goes here
 %   Detailed explanation goes here
 
-omega = gamma*iso.B0 + (Gx*iso.x + Gy*iso.y) * gamma / (2*pi);
+omega = (iso.B0 + (Gx*iso.x + Gy*iso.y)) * gamma;
 omega = omega - R_FoR;
 t_Relax = linspace(sum(relax(1:(end-1))),sum(relax),N)';
 

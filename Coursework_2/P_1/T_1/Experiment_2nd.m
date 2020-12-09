@@ -1,169 +1,261 @@
-%% Free procession with Dephasing
-% Author: Imraj Singh 03/11/2020
+%% Problem 1: Experiment 2 gradient relaxation
+% Author: Imraj Singh 08/11/2020
 
 clc
 clear
 close all
 
-addpath(genpath('.../Functions'))
-% Number of isochromats x
-Numx = 11;
-% Number of isochromats y
-Numy = 11;
-% Spatial coordinates of isochromats (m)
-x = linspace(-10,10,Numx)/1000;
-y = linspace(-10,10,Numy)/1000;
+% Add the path that holds functions
+addpath 'C:\Users\Imraj Singh\Documents\UCL\Comp_MRI\COMP0121\Coursework_2\Functions'
 
+%% Define coordinate position of each isochromat
+
+% Number of isochromats x
+Numx = 21;
+
+% Number of isochromats y
+Numy = 1;
+
+% Length of segment
+L = 20/1000;
+
+% Spatial coordinates of isochromats (m)
+x = linspace(-L/2,L/2,Numx);
+y = linspace(0,0,Numy);
+
+% Create mesh grid of x and y coordinates
 [X, Y] = meshgrid(x,y);
 
+% Flatten the array into a vector to make manipulation easier
 X = X(:);
 Y = Y(:);
 
+%% Set NMR parameters and initialise isochromat structures
 
-% Gyromagnetic ratio
+% Gyromagnetic ratio of hyrodrogen proton
 gamma = 2.68*10^8;
-% Initalise the isochromats
-iso = initalise_iso(X, Y);
+
+% Initalise the isochromats, setting the X, Y cooridates and instantiating
+% the Mx, My, Mz fields of the structures
+iso = initialise_iso(X, Y);
+
 % B0
-B0 = 3;
-% Initalise the B0
-iso = initalise_B0(iso, B0);
+B0 = 1.5;
+
+% Initalise the B0 this is done such that arbitrary perturbation can be
+% added to the B0 field to simulate field inhomogenities
+iso = initialise_B0(iso, B0);
+
 % Larmor frequency of rotating frame of reference
 R_FoR = B0*gamma;
-%
-T2 = 1;
-T1 = 2;
-%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%% DEFINE BLOCKS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Orientate -> rf pulse -> free precession
-% [N, t, Gx, Gy, relax]
-blocks.N = [3 11 11 11 11 11];
-blocks.t = [0 3.2 5.12 5.12 5.12 5.12]/1000;
-blocks.Gx = [0 0 4.6 -4.6 4.6 -4.6]/1000;
-blocks.Gy = [0 0 0 0 0 0]/1000;
-blocks.relax = [0 0 5.12 5.12 5.12 5.12]/1000;
 
+% Setting the brain tissure relaxation values. Approximation based off:
+% Wansapura JP, Holland SK, Dunn RS, Ball WS Jr. NMR relaxation times in
+% the human brain at 3.0 tesla. J Magn Reson Imaging. 1999 Apr;9(4):531-8.
+% doi: 10.1002/(sici)1522-2586(199904)9:4<531::aid-jmri4>3.0.co;2-l.
+% PMID: 10232510. Approximate average of white and grey matter.
+T1 = 1;
+T2 = .1;
+
+%% Define the experiment in terms of blocks
+
+% Each experiment begins with initialising the direction of the spins then
+% by flipping the spins with a pi/2 hard RF pulse along the x' axis over
+% 0.32ms
+
+% [Set the number of points to be calculated minimum of 2 for each block
+blocks.N = [1 65 257];
+
+% Time over which the block occurs
+blocks.t = [0 .32 5.12]/1000;
+
+% The gradient of the field dB/dx for each block
+blocks.Gx = [0 0 -4.6]/1000;
+
+% The gradient of the field dB/dz for each block
+blocks.Gy = [0 0 0]/1000;
+
+% The relaxation time only when spins are relaxation
+blocks.relax = [0 0 5.12]/1000;
+
+% Initialise the Mx, My, Mz values that stores the sum of all the spins
+% magnetisation
 Mx = zeros(sum(blocks.N),1);
 My = zeros(sum(blocks.N),1);
 Mz = zeros(sum(blocks.N),1);
 
+% Calculate magnetisation for all the spins
 for i=1:length(iso)
-        iso(i) = initial_dir(iso(i),'z',blocks.N(1));
-        
-        iso(i) = rf_pulse(iso(i), 'x', pi/2, blocks.N(2), blocks.t(2));
-        
-        iso(i) = free_relaxation(iso(i), blocks.N(3), blocks.t(3), blocks.Gx(3), blocks.Gy(3), blocks.relax, gamma, T1, T2, R_FoR);
-        
-        iso(i) = free_relaxation(iso(i), blocks.N(4), blocks.t(4), blocks.Gx(4), blocks.Gy(4), blocks.relax, gamma, T1, T2, R_FoR);
-        
-        iso(i) = free_relaxation(iso(i), blocks.N(5), blocks.t(5), blocks.Gx(5), blocks.Gy(5), blocks.relax, gamma, T1, T2, R_FoR);
-        
-        iso(i) = free_relaxation(iso(i), blocks.N(6), blocks.t(6), blocks.Gx(6), blocks.Gy(6), blocks.relax, gamma, T1, T2, R_FoR);
-%         for k=1:sum(blocks.N)
-%             map(i,k) = atan2(iso(i).My(k), iso(i).Mx(k));
-%         end
-        Mx = Mx + iso(i).Mx;
-        My = My + iso(i).My;
-        Mz = Mz + iso(i).Mz;
+    % Initialise spin
+    iso(i) = initial_dir(iso(i),'z',blocks.N(1));
+    
+    % RF pulse
+    iso(i) = rf_pulse(iso(i), 'x', pi/2, blocks.N(2), blocks.t(2));
+    
+    % Free relaxation with gradient
+    iso(i) = free_relaxation(iso(i), blocks.N(3), blocks.t(3), ...
+        blocks.Gx(3), blocks.Gy(3), blocks.relax(1:3), gamma, T1, T2, R_FoR);
+    
+    % Add the magnetisations to the total  magnetisation
+    Mx = Mx + iso(i).Mx;
+    My = My + iso(i).My;
+    Mz = Mz + iso(i).Mz;
 end
 
-Mx = Mx/(Numx*Numy);
-My = My/(Numx*Numy);
-Mz = Mz/(Numx*Numy);
+% Magnetisation now normalised across all the spins
+Mx = Mx/length(iso);
+My = My/length(iso);
+Mz = Mz/length(iso);
 
-Time = linspace(0, blocks.t(1), blocks.N(1));
-for i = 2:length(blocks.t)
-   Time = [Time, linspace(sum(blocks.t(1:(i-1))),sum(blocks.t(1:i)),blocks.N(i))];
-end
+% Calculate the time vector
+Time = unroll_time(blocks.N,blocks.t);
+
+% Calculate the Gx, Gy, kx, ky vectors in time
+[Gx_t, Gy_t, kx, ky] = unroll_plotting(blocks.N,blocks.Gx,blocks.Gy,gamma,Time);
 
 
 %% Animation module
+
+% Normalisation constants used for plotting the quiver3s
 norm = 0.001;
 norm_scale = 2;
 
-Gx_t = [];
-Gy_t = [];
-kx = [];
-ky = [];
-
-[Gx_t, Gy_t, kx, ky] = unroll_plotting(blocks.N,blocks.Gx,blocks.Gy,gamma,Time);
-
+% Create circular colour map
 cmap = colormap(hsv(360));
+
+% Set the video writing name and location
+video = VideoWriter(['P1_E2', '.mp4'], 'MPEG-4');
+
+% Set the frame rate of video
+frameRate = 25;
+video.set('FrameRate', frameRate);
+
+% Open the video
+video.open();
+
+% Open a figure that has frame recorded
+h = figure;
+
 for i=1:length(Time)
+    
+    if Time(i)>=0 && Time(i)<=sum(blocks.t(1:1))
+    sgtitle(['Flipping the spins, time: ', num2str(Time(i)*1000), ' ms'], "interpreter", "latex", "fontsize", 15)
+    elseif Time(i)>=sum(blocks.t(1:1)) && Time(i)<=sum(blocks.t(1:2))
+    sgtitle(['Flipping the spins, time: ', num2str(Time(i)*1000), ' ms'], "interpreter", "latex", "fontsize", 15)
+    elseif Time(i)>sum(blocks.t(1:2)) && Time(i)<=sum(blocks.t(1:3))
+    sgtitle(['Recording signal, time (after flip): ', num2str((Time(i)-blocks.t(2))*1000), ' ms'], "interpreter", "latex", "fontsize", 15)
+    end
+    
+    % First subplot - quiver of spin vectors in space
     subplot(2,2,1)
-    h = quiver3(iso(1).x,iso(1).y,0,iso(1).Mx(i)*norm,iso(1).My(i)*norm,iso(1).Mz(i)*norm,'linewidth',2,'LineStyle','-');
-    alpha = atan2(iso(1).My(i)*norm, iso(1).Mx(i)*norm);
+    % First element of vector of iso structs
+    h1 = quiver3(iso(1).x,iso(1).y,0,iso(1).Mx(i)*norm,iso(1).My(i)*norm,iso(1).Mz(i)*norm,'linewidth',2,'LineStyle','-','Color','k');
+    % Calculate the angle of the spin from the positive y'-axis clockwise
+    alpha = atan2(iso(1).My(i), iso(1).Mx(i));
+    % Convert the angle to degrees and round
     idx = ceil(rad2deg(alpha));
-    if idx < 1 % negative indices and 0 are invalid
+    % If the degree are negative/zero then invalid and add 360 degrees
+    if idx < 1
         idx = idx + 360;
     end
-    set(h, 'Color', cmap(idx,:)) % before, change each quiver command to h = quiver(...)
+    % Set the colour of the quiver according to the colour map
+    set(h1, 'Color', cmap(idx,:))
     hold on
     
-    for z=1:length(iso)
-            h = quiver3(iso(z).x,iso(z).y,0,iso(z).Mx(i)*norm,iso(z).My(i)*norm,iso(z).Mz(i)*norm,'linewidth',2,'LineStyle','-');
-            alpha = atan2(iso(z).My(i)*norm, iso(z).Mx(i)*norm);
-            idx = ceil(rad2deg(alpha));
-            if idx < 1 % negative indices and 0 are invalid
-                idx = idx + 360;
-            end
-            set(h, 'Color', cmap(idx,:)) % before, change each quiver command to h = quiver(...)
+    for z=2:length(iso)
+        % z'th element of vector of iso structs
+        h1 = quiver3(iso(z).x,iso(z).y,0,iso(z).Mx(i)*norm,iso(z).My(i)*norm,iso(z).Mz(i)*norm,'linewidth',2,'LineStyle','-','Color','k');
+        % Calculate the angle of the spin from the positive y'-axis clockwise
+        alpha = atan2(iso(z).My(i), iso(z).Mx(i));
+        % Convert the angle to degrees and round
+        idx = ceil(rad2deg(alpha));
+        % If the degree are negative/zero then invalid and add 360 degrees
+        if idx < 1
+            idx = idx + 360;
+        end
+        % Set the colour of the quiver according to the colour map
+        set(h1, 'Color', cmap(idx,:))
+        hold on
     end
     
-    view(2)
     grid on
     box on
     hold off
+    % Set the axes limits
     xlim([min(x)-norm*norm_scale max(x)+norm*norm_scale]);
-    %ylim([-norm*norm_scale norm*norm_scale]);
     ylim([min(x)-norm*norm_scale max(x)+norm*norm_scale]);
-    zlim([0 norm]);
-    xlabel("$M_{x'}$", "interpreter", "latex", "fontsize", 15)
-    ylabel("$M_{y'}$", "interpreter", "latex", "fontsize", 15)
-    zlabel("$M_{z'}$", "interpreter", "latex", "fontsize", 15)
+    zlim([min(x)-norm*norm_scale max(x)+norm*norm_scale]);
+    % Change to 2D view after flip
+    if Time(i) > blocks.t(2)
+        view(2)
+    end
+    % Set the axes labels
+    xlabel("$x'$", "interpreter", "latex", "fontsize", 10)
+    ylabel("$y'$", "interpreter", "latex", "fontsize", 10)
+    zlabel("$z'$", "interpreter", "latex", "fontsize", 10)
     
-    h1 = subplot(2,2,2);
-    plot(h1,Time(1:i),Mx(1:i),'linewidth',1,'LineStyle','-','Color','r')
+    % Second subplot - Magnetisation vs Time
+    subplot(2,2,2);
+    % Plot the full magnetisation
+    plot(Time(1:i)*1000,Mx(1:i),'linewidth',1,'LineStyle','-','Color','r')
     hold on
-    plot(h1,Time(1:i),My(1:i),'linewidth',1,'LineStyle','-','Color','b')
+    plot(Time(1:i)*1000,My(1:i),'linewidth',1,'LineStyle','-','Color','b')
+    % plot the signal points
+    if Time(i)<sum(blocks.t(1:3)) &&  Time(i)>sum(blocks.t(1:2))
+        plot(Time(sum(blocks.N(1:2)):i)*1000,Mx(sum(blocks.N(1:2)):i),'.','MarkerSize',8,'Color','k')
+        plot(Time(sum(blocks.N(1:2)):i)*1000,My(sum(blocks.N(1:2)):i),'.','MarkerSize',8,'Color','k')
+    end
     grid on
     box on
     hold off
-    legend(h1,'x','y')
-    xlim(h1,[0 max(Time)*1.2]);
-    ylim(h1,[-1 1]*1.2);
-    xlabel(h1,"Time (s)", "interpreter", "latex", "fontsize", 15)
-    ylabel(h1,"Signal", "interpreter", "latex", "fontsize", 15)
+    % Set the legend
+    legend("$M_{x'}$","$M_{y'}$", "interpreter", "latex", "fontsize", 10,'Location','southeast')
+    % Set the axes limits
+    xlim([0 max(Time)*1.2*1000]);
+    ylim([-1 1]*1.2);
+    % Set the axes labels
+    xlabel("Time (ms)", "interpreter", "latex", "fontsize", 10)
+    ylabel("Magnetisation", "interpreter", "latex", "fontsize", 10)
     
-    h1 = subplot(2,2,3);
-    plot(h1,kx(1:i),ky(1:i),'linewidth',1,'LineStyle','-','Color','r')
+    % Third subplot - K space values
+    subplot(2,2,3);
+    plot(kx(1:i)/1000,ky(1:i)/1000,'linewidth',1,'LineStyle','-','Color','r')
     hold on
-%     plot(h1,Time(1:i),ky(1:i),'linewidth',1,'LineStyle','-','Color','b')
+    % Current K space value
+    plot(kx(i)/1000,ky(i)/1000,'.','MarkerSize',8,'Color','k')
     grid on
     box on
     hold off
-    xlim(h1,[min([min(kx) min(ky)])*1.2 max([max(kx) max(ky)])*1.2]);
-    ylim(h1,[min([min(kx) min(ky)])*1.2 max([max(kx) max(ky)])*1.2]);
-    xlabel(h1,"Time (s)", "interpreter", "latex", "fontsize", 15)
-    ylabel(h1,"Signal", "interpreter", "latex", "fontsize", 15)
+    % Set the axes limits
+    xlim([-1.2 1.2]);
+    ylim([-1.2 1.2]);
+    % Set the axes labels
+    xlabel("$k_x$ (1/mm)", "interpreter", "latex", "fontsize", 10)
+    ylabel("$k_y$ (1/mm)", "interpreter", "latex", "fontsize", 10)
     
-    h1 = subplot(2,2,4);
-    plot(h1,Time(1:i),kx(1:i),'linewidth',1,'LineStyle','-','Color','r')
+    % Fourth subplot - Time vs K space
+    subplot(2,2,4);
+    % X component
+    plot(Time(1:i)*1000,kx(1:i)/1000,'linewidth',1,'LineStyle','-','Color','r')
     hold on
-    plot(h1,Time(1:i),ky(1:i),'linewidth',1,'LineStyle','-','Color','b')
+    % Y component
+    plot(Time(1:i)*1000,ky(1:i)/1000,'linewidth',1,'LineStyle','-','Color','b')
     grid on
     box on
     hold off
-    legend(h1,'x','y')
-    xlim(h1,[0 max(Time)*1.2]);
-    ylim(h1, [min([min(kx) min(ky)])*1.2 max([max(kx) max(ky)])*1.2])
-    xlabel(h1,"Time (s)", "interpreter", "latex", "fontsize", 15)
-    ylabel(h1,"Signal", "interpreter", "latex", "fontsize", 15)
-    pause(0.01)
+    % Set the legend
+    legend("$k_x$","$k_y$", "interpreter", "latex", "fontsize", 10,'Location','northwest')
+    % Set the axes limits
+    xlim([0 max(Time)*1.2*1000]);
+    ylim([-1.2 1.2])
+    % Set the axes labels
+    xlabel("Time (ms)", "interpreter", "latex", "fontsize", 10)
+    ylabel("Spatial frequency (1/mm)", "interpreter", "latex", "fontsize", 10)
+    
+    % Set frame to add to video
+    frame = getframe(h);
+    video.writeVideo(frame);
 end
 
-
-
-
-
+% Close the video
+video.close();

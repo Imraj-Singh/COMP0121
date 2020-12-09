@@ -6,7 +6,7 @@ clear
 close all
 
 % Add the path that holds functions
-addpath(genpath('..\Functions'))
+addpath 'C:\Users\Imraj Singh\Documents\UCL\Comp_MRI\COMP0121\Coursework_2\Functions'
 
 %% Define coordinate position of each isochromat
 

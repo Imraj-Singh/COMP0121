@@ -20,10 +20,10 @@ Ts = 5.12;
 Gradient = -4.6;
 
 % Number of isochromats x
-Numx = 101;
+Numx = 51;
 
 % Number of isochromats y
-Numy = 101;
+Numy = 51;
 
 % Spatial coordinates of isochromats (m)
 x1 = linspace(-L/2,0,Numx);
@@ -78,19 +78,19 @@ T2 = .1;
 
 % [Set the number of points to be calculated minimum of 2 for each block
 %blocks.N = [1 65 129 257];
-blocks.N = [1 11 101 201];
+blocks.N = [1 11 101 101 201];
 
 % Time over which the block occurs
-blocks.t = [0 .32 Ts/2 Ts]/1000;
+blocks.t = [0 .32 Ts/(16) Ts/2 Ts]/1000;
 
 % The gradient of the field dB/dx for each block
-blocks.Gx = [0 0 Gradient -Gradient]/1000;
+blocks.Gx = [0 0 0 Gradient -Gradient]/1000;
 
 % The gradient of the field dB/dz for each block
-blocks.Gy = [0 0 Gradient -Gradient]/1000;
+blocks.Gy = [0 0 Gradient 0 0]/1000;
 
 % The relaxation time only when spins are relaxation
-blocks.relax = [0 0 Ts/2 Ts]/1000;
+blocks.relax = [0 0 Ts/(16) Ts/2 Ts]/1000;
 
 % Initialise the Mx, My, Mz values that stores the sum of all the spins
 % magnetisation
@@ -109,13 +109,17 @@ for i=1:length(iso)
     % RF pulse
     iso(i) = rf_pulse(iso(i), 'x', pi/2, blocks.N(2), blocks.t(2));
     
-    % Free relaxation with gradient
+    % Free relaxation with phase encoding gradient
     iso(i) = free_relaxation(iso(i), blocks.N(3), blocks.t(3), ...
         blocks.Gx(3), blocks.Gy(3), blocks.relax(1:3), gamma, T1, T2, R_FoR);
     
-    % Free relaxation with negative gradient
+    % Free relaxation with dephasing readout
     iso(i) = free_relaxation(iso(i), blocks.N(4), blocks.t(4), ...
         blocks.Gx(4), blocks.Gy(4), blocks.relax(1:4), gamma, T1, T2, R_FoR);
+    
+    % Free relaxation with rephasing readout
+    iso(i) = free_relaxation(iso(i), blocks.N(5), blocks.t(5), ...
+        blocks.Gx(5), blocks.Gy(5), blocks.relax(1:5), gamma, T1, T2, R_FoR);
     
     ix = round((iso(i).x+L/2)/(x1(2)-x1(1)) + 1);
     iy = round((iso(i).y+L/2)/(y1(2)-y1(1)) + 1);
@@ -141,13 +145,13 @@ Time = unroll_time(blocks.N,blocks.t);
 % Calculate the Gx, Gy, kx, ky vectors in time
 [Gx_t, Gy_t, kx, ky] = unroll_plotting(blocks.N,blocks.Gx,blocks.Gy,gamma,Time);
 
-colormap([1 1 1; hsv(360); 0 0 0]);
-for i=1:length(Time)
-imagesc(linspace(-L/2,L/2,Numx*2-1),linspace(-L/2,L/2,Numy*2-1),map(:,:,i))
-set(gca,'YDir','normal')
-pause(0.1)
-
-end
+% colormap([1 1 1; hsv(360); 0 0 0]);
+% for i=1:length(Time)
+% imagesc(linspace(-L/2,L/2,Numx*2-1),linspace(-L/2,L/2,Numy*2-1),map(:,:,i))
+% set(gca,'YDir','normal')
+% pause(0.1)
+% 
+% end
 
 
 %% Animation module
@@ -186,51 +190,16 @@ for i=1:length(Time)
     
     % First subplot - quiver of spin vectors in space
     subplot(2,2,1)
-    % First element of vector of iso structs
-    h1 = quiver3(iso(1).x,iso(1).y,0,iso(1).Mx(i)*norm,iso(1).My(i)*norm,iso(1).Mz(i)*norm,'linewidth',2,'LineStyle','-','Color','k');
-    % Calculate the angle of the spin from the positive y'-axis clockwise
-    alpha = atan2(iso(1).My(i), iso(1).Mx(i));
-    % Convert the angle to degrees and round
-    idx = ceil(rad2deg(alpha));
-    % If the degree are negative/zero then invalid and add 360 degrees
-    if idx < 1
-        idx = idx + 360;
-    end
-    % Set the colour of the quiver according to the colour map
-    set(h1, 'Color', cmap(idx,:))
-    hold on
-    
-    for z=2:length(iso)
-        % z'th element of vector of iso structs
-        h1 = quiver3(iso(z).x,iso(z).y,0,iso(z).Mx(i)*norm,iso(z).My(i)*norm,iso(z).Mz(i)*norm,'linewidth',2,'LineStyle','-','Color','k');
-        % Calculate the angle of the spin from the positive y'-axis clockwise
-        alpha = atan2(iso(z).My(i), iso(z).Mx(i));
-        % Convert the angle to degrees and round
-        idx = ceil(rad2deg(alpha));
-        % If the degree are negative/zero then invalid and add 360 degrees
-        if idx < 1
-            idx = idx + 360;
-        end
-        % Set the colour of the quiver according to the colour map
-        set(h1, 'Color', cmap(idx,:))
-        hold on
-    end
+    colormap([1 1 1; hsv(360); 0 0 0]);
+    imagesc(linspace(-L/2,L/2,Numx*2-1),linspace(-L/2,L/2,Numy*2-1),map(:,:,i))
+    set(gca,'YDir','normal')
     
     grid on
     box on
     hold off
-    % Set the axes limits
-    xlim([min(x)-norm*norm_scale max(x)+norm*norm_scale]);
-    ylim([min(x)-norm*norm_scale max(x)+norm*norm_scale]);
-    zlim([min(x)-norm*norm_scale max(x)+norm*norm_scale]);
-    % Change to 2D view after flip
-    if Time(i) > blocks.t(2)
-        view(2)
-    end
     % Set the axes labels
     xlabel("$x'$", "interpreter", "latex", "fontsize", 10)
     ylabel("$y'$", "interpreter", "latex", "fontsize", 10)
-    zlabel("$z'$", "interpreter", "latex", "fontsize", 10)
     
     % Second subplot - Magnetisation vs Time
     subplot(2,2,2);
@@ -291,8 +260,9 @@ for i=1:length(Time)
     ylabel("Spatial frequency (1/mm)", "interpreter", "latex", "fontsize", 10)
     
     % Set frame to add to video
-    frame = getframe(h);
-    video.writeVideo(frame);
+    pause(0.1)
+%     frame = getframe(h);
+%     video.writeVideo(frame);
 end
 
 % Close the video

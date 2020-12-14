@@ -28,14 +28,14 @@ Numxy = L/dxy/2;
 
 % Spatial coordinates of isochromats (m)
 x1 = linspace(-L/2 + dxy/2, 0 - dxy/2,Numxy);
-y1 = linspace(0 + dxy/2, L/2 - dxy/2,Numxy);
-
-% Create mesh grid of x and y coordinates
-[X1, Y1] = meshgrid(x1,y1);
+y1 = linspace(-L/2 + dxy/2, 0 - dxy/2,Numxy);
 
 % Spatial coordinates of isochromats (m)
 x2 = linspace(0 + dxy/2, L/2 - dxy/2,Numxy);
-y2 = linspace(-L/2 + dxy/2, 0 - dxy/2,Numxy);
+y2 = linspace(0 + dxy/2, L/2 - dxy/2,Numxy);
+
+% Create mesh grid of x and y coordinates
+[X1, Y1] = meshgrid(x1,y1);
 
 % Create mesh grid of x and y coordinates
 [X2, Y2] = meshgrid(x2,y2);
@@ -86,7 +86,7 @@ Gradient_y = linspace(Gradient,-Gradient, NumGy + 1);
 
 % [Set the number of points to be calculated minimum of 2 for each block
 %blocks.N = [1 65 129 257];
-blocks.N = [1 1 1+NumGx/2 1+NumGx/2 1+NumGx];
+blocks.N = [1 21 1+NumGx/2 1+NumGx/2 1+NumGx];
 
 % Time over which the block occurs
 blocks.t = [0 .32/1000 Ts/2 Ts/2 Ts];

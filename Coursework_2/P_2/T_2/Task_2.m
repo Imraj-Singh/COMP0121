@@ -26,19 +26,18 @@ Gradient = -4.6/1000;
 % Number of isochromats x and y
 Numxy = L/dxy/2;
 
-d = 0;
+d = 10*dxy + dxy*.5;
 
 % Spatial coordinates of isochromats (m)
 x1 = linspace(-L/2 + dxy/2 - d, 0 - dxy/2 - d,Numxy);
-y1 = linspace(0 + dxy/2 + d, L/2 - dxy/2 + d,Numxy);
-
-% Create mesh grid of x and y coordinates
-[X1, Y1] = meshgrid(x1,y1);
+y1 = linspace(-L/2 + dxy/2 - d, 0 - dxy/2 - d,Numxy);
 
 % Spatial coordinates of isochromats (m)
 x2 = linspace(0 + dxy/2 + d, L/2 - dxy/2 + d,Numxy);
-y2 = linspace(-L/2 + dxy/2 - d, 0 - dxy/2 - d,Numxy);
+y2 = linspace(0 + dxy/2 + d, L/2 - dxy/2 + d,Numxy);
 
+% Create mesh grid of x and y coordinates
+[X1, Y1] = meshgrid(x1,y1);
 % Create mesh grid of x and y coordinates
 [X2, Y2] = meshgrid(x2,y2);
 
@@ -82,8 +81,8 @@ clearvars B0
 % by flipping the spins with a pi/2 hard RF pulse along the x' axis over
 % 0.32ms
 
-NumGx = Num*2;
-NumGy = Num*2;
+NumGx = 256;
+NumGy = 2;
 Gradient_y = linspace(Gradient,-Gradient, NumGy + 1);
 
 % [Set the number of points to be calculated minimum of 2 for each block

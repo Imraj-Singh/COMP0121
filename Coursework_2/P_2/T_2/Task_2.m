@@ -10,11 +10,14 @@ addpath 'C:\Users\Imraj Singh\Documents\UCL\Comp_MRI\COMP0121\Coursework_2\Funct
 
 %% Define coordinate position of each isochromat
 
+% Number of isochromats along one side of square
+Num = 8;
+
+
 % Spatial spacing
 dxy = 1/(500*2);
 
 % Length of segment
-Num = 8;
 L = Num*dxy;
 
 % Sampling time
@@ -26,6 +29,7 @@ Gradient = -4.6/1000;
 % Number of isochromats x and y
 Numxy = L/dxy/2;
 
+% Distance between the two squares
 d = 10*dxy + dxy*.5;
 
 % Spatial coordinates of isochromats (m)
@@ -369,7 +373,6 @@ for i=1:length(Time)
     % Set the axes labels
     xlabel("Time (ms)", "interpreter", "latex", "fontsize", 10)
     ylabel("Spatial frequency (1/mm)", "interpreter", "latex", "fontsize", 10)
-%     pause(0.1)
     % Set frame to add to video
     frame = getframe(h);
     video.writeVideo(frame);

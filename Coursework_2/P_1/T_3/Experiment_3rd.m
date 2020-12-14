@@ -17,7 +17,7 @@ Numx = 21;
 Numy = 1;
 
 % Length of segment
-L = 20/1000;
+L = 50/1000;
 
 % Sampling time
 Ts = 5.12;
@@ -84,6 +84,11 @@ blocks.Gy = [0 0 0 0]/1000;
 % The relaxation time only when spins are relaxation
 blocks.relax = [0 0 Ts/2 Ts]/1000;
 
+% Reset k-space
+blocks.resetk = [1 0 0 0];
+
+% Where the signal is collected
+blocks.signal = [0 0 0 1];
 % Initialise the Mx, My, Mz values that stores the sum of all the spins
 % magnetisation
 Mx = zeros(sum(blocks.N),1);
@@ -121,13 +126,16 @@ Mz = Mz/length(iso);
 Time = unroll_time(blocks.N,blocks.t);
 
 % Calculate the Gx, Gy, kx, ky vectors in time
-[Gx_t, Gy_t, kx, ky] = unroll_plotting(blocks.N,blocks.Gx,blocks.Gy,gamma,Time);
+[Gx_t, Gy_t, kx, ky] = unroll_plotting(blocks.N,blocks.Gx,blocks.Gy,blocks.resetk,gamma,Time);
+
+% Binary filter used to just plot points where the signal is taken
+s_filter = unroll_signal(blocks.N, blocks.signal);
 
 
 %% Animation module
 
 % Normalisation constants used for plotting the quiver3s
-norm = 0.001;
+norm = 0.003;
 norm_scale = 2;
 
 % Create circular colour map
@@ -213,17 +221,14 @@ for i=1:length(Time)
     hold on
     plot(Time(1:i)*1000,My(1:i),'linewidth',1,'LineStyle','-','Color','b')
     % plot the signal points
-    if Time(i)<sum(blocks.t(1:4)) &&  Time(i)>sum(blocks.t(1:3))
-        plot(Time(sum(blocks.N(1:3)):i)*1000,Mx(sum(blocks.N(1:3)):i),'.','MarkerSize',8,'Color','k')
-        plot(Time(sum(blocks.N(1:3)):i)*1000,My(sum(blocks.N(1:3)):i),'.','MarkerSize',8,'Color','k')
-    end
+    plot(Time(find(s_filter(1:i)))*1000,My(find(s_filter(1:i))),'.','MarkerSize',5,'Color','k')
     grid on
     box on
     hold off
     % Set the legend
     legend("$M_{x'}$","$M_{y'}$", "interpreter", "latex", "fontsize", 10,'Location','southeast')
     % Set the axes limits
-    xlim([0 max(Time)*1.2*1000]);
+    xlim([0 max(Time)*1000]);
     ylim([-1 1]*1.2);
     % Set the axes labels
     xlabel("Time (ms)", "interpreter", "latex", "fontsize", 10)
@@ -231,16 +236,17 @@ for i=1:length(Time)
     
     % Third subplot - K space values
     subplot(2,2,3);
-    plot(kx(1:i)/1000,ky(1:i)/1000,'linewidth',1,'LineStyle','-','Color','r')
+    % plot the signal points
+    plot(kx(find(s_filter(1:i)))/1000,ky(find(s_filter(1:i)))/1000,'.','MarkerSize',8,'Color','k')
     hold on
-    % Current K space value
-    plot(kx(i)/1000,ky(i)/1000,'.','MarkerSize',8,'Color','k')
+    % plot the current location
+    plot(kx(i)/1000,ky(i)/1000,'x','MarkerSize',5,'Color','k')
     grid on
     box on
     hold off
     % Set the axes limits
-    xlim([-1.2 1.2]);
-    ylim([-1.2 1.2]);
+    xlim([-.6 .6]);
+    ylim([-.6 .6]);
     % Set the axes labels
     xlabel("$k_x$ (1/mm)", "interpreter", "latex", "fontsize", 10)
     ylabel("$k_y$ (1/mm)", "interpreter", "latex", "fontsize", 10)
@@ -258,7 +264,7 @@ for i=1:length(Time)
     % Set the legend
     legend("$k_x$","$k_y$", "interpreter", "latex", "fontsize", 10,'Location','northwest')
     % Set the axes limits
-    xlim([0 max(Time)*1.2*1000]);
+    xlim([0 max(Time)*1000]);
     ylim([-1.2 1.2])
     % Set the axes labels
     xlabel("Time (ms)", "interpreter", "latex", "fontsize", 10)

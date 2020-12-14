@@ -11,13 +11,19 @@ addpath 'C:\Users\Imraj Singh\Documents\UCL\Comp_MRI\COMP0121\Coursework_2\Funct
 %% Define coordinate position of each isochromat
 
 % Number of isochromats x
-Numx = 21;
+Numx = 20;
 
 % Number of isochromats y
 Numy = 1;
 
+% Length of segment
+L = 20/1000;
+
+% Spatial spacing
+dx = L/Numx;
+
 % Spatial coordinates of isochromats (m)
-x = linspace(-10,10,Numx)/1000;
+x = linspace(-L/2 + dx/2, L/2 - dx/2,Numx);
 y = linspace(0,0,Numy)/1000;
 
 % Create mesh grid of x and y coordinates
@@ -61,19 +67,25 @@ T2 = .1;
 % 0.32ms
 
 % [Set the number of points to be calculated minimum of 2 for each block
-blocks.N = [11 101 257 151];
+blocks.N = [1 101 257 151 151];
 
 % Time over which the block occurs
-blocks.t = [0 .32 5.12 4994.88]/1000;
+blocks.t = [0 .32 5.12 500 4494.88]/1000;
 
 % The gradient of the field dB/dx for each block
-blocks.Gx = [0 0 0 0]/1000;
+blocks.Gx = [0 0 0 0 0]/1000;
 
 % The gradient of the field dB/dz for each block
-blocks.Gy = [0 0 0 0]/1000;
+blocks.Gy = [0 0 0 0 0]/1000;
 
 % The relaxation time only when spins are relaxation
-blocks.relax = [0 0 5.12 4994.88]/1000;
+blocks.relax = [0 0 5.12 500 4494.88]/1000;
+
+% Reset k-space
+blocks.resetk = [1 0 0 0 0];
+
+% Where the signal is collected
+blocks.signal = [0 0 1 0 0];
 
 % Initialise the Mx, My, Mz values that stores the sum of all the spins
 % magnetisation
@@ -97,6 +109,10 @@ for i=1:length(iso)
     iso(i) = free_relaxation(iso(i), blocks.N(4), blocks.t(4), ...
         blocks.Gx(4), blocks.Gy(4), blocks.relax(1:4), gamma, T1, T2, R_FoR);
     
+    % Free relaxation no gradient
+    iso(i) = free_relaxation(iso(i), blocks.N(5), blocks.t(5), ...
+        blocks.Gx(5), blocks.Gy(5), blocks.relax(1:5), gamma, T1, T2, R_FoR);
+    
     % Add the magnetisations to the total  magnetisation
     Mx = Mx + iso(i).Mx;
     My = My + iso(i).My;
@@ -112,7 +128,10 @@ Mz = Mz/length(iso);
 Time = unroll_time(blocks.N,blocks.t);
 
 % Calculate the Gx, Gy, kx, ky vectors in time
-[Gx_t, Gy_t, kx, ky] = unroll_plotting(blocks.N,blocks.Gx,blocks.Gy,gamma,Time);
+[Gx_t, Gy_t, kx, ky] = unroll_plotting(blocks.N,blocks.Gx,blocks.Gy,blocks.resetk,gamma,Time);
+
+% Binary filter used to just plot points where the signal is taken
+s_filter = unroll_signal(blocks.N, blocks.signal);
 
 %% Animation module
 
@@ -137,6 +156,17 @@ video.open();
 h = figure;
 
 for i=1:length(Time)
+    
+    % Set the title based on what part of the pulse sequence is animated
+    if Time(i)<=sum(blocks.t(1:2))
+    sgtitle(['Flipping the spins, time: ', num2str(round(Time(i)*1000000)/1000), ' ms'], "interpreter", "latex", "fontsize", 15)
+    elseif Time(i)<=sum(blocks.t(1:3))
+    sgtitle(['Recording signal, time (after flip): ', num2str(round((Time(i)-blocks.t(2))*1000000)/1000), ' ms'], "interpreter", "latex", "fontsize", 15)
+    elseif Time(i)<=sum(blocks.t(1:4))
+    sgtitle(['Relaxation of $\mathcal{O}(T_2)$, time (after flip): ', num2str(round((Time(i)-blocks.t(2))*1000000)/1000), ' ms'], "interpreter", "latex", "fontsize", 15)
+    elseif Time(i)<=sum(blocks.t(1:5))
+    sgtitle(['Relaxation of $\mathcal{O}(T_1)$, time (after flip): ', num2str(round((Time(i)-blocks.t(2))*1000000)/1000), ' ms'], "interpreter", "latex", "fontsize", 15)
+    end
     % First subplot
     subplot(2,2,1)
     % First element of vector of iso structs
@@ -200,24 +230,19 @@ for i=1:length(Time)
     
     % Last subplot, double length
     subplot(2,2,3:4);
-    % Set the title based on what part of the pulse sequence is animated
-    if Time(i)<=(blocks.t(2))
-    title(['Flipping the spins, time: ', num2str(Time(i)*1000), ' ms'], "interpreter", "latex", "fontsize", 15)
-    elseif Time(i)<=(blocks.t(2)+blocks.t(3))
-    title(['Recording signal, time (after flip): ', num2str((Time(i)-blocks.t(2))*1000), ' ms'], "interpreter", "latex", "fontsize", 15)
-    elseif Time(i)>(blocks.t(2)+blocks.t(3))
-    title(['Full relaxation, time (after flip): ', num2str(ceil((Time(i)-blocks.t(2))*1000)), ' ms'], "interpreter", "latex", "fontsize", 15)
-    end
-    hold on
     % Plot the y' and z' magnetisation as these are the most important 
     plot(Time(1:i)*1000,My(1:i),'linewidth',2,'LineStyle','-','Color','b')
+    hold on
     plot(Time(1:i)*1000,Mz(1:i),'linewidth',2,'LineStyle','-','Color','r')
+    plot(Time(find(s_filter(1:i)))*1000,My(find(s_filter(1:i))),'.','MarkerSize',5,'Color','k')
     grid on
     box on
     hold off
     % Set two different scales to investigate the full relaxation
-    if Time(i)<(blocks.t(2)+blocks.t(3))
-        xlim([0 (blocks.t(2)+blocks.t(3))*1000]);
+    if Time(i)<sum(blocks.t(1:3))
+        xlim([0 sum(blocks.t(1:3))*1000]);
+    elseif Time(i)<sum(blocks.t(1:4))
+        xlim([0 sum(blocks.t(1:4))*1000]);
     else
         xlim([0 max(Time)*1000]);
     end

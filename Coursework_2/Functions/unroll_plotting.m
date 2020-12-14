@@ -14,8 +14,8 @@ end
 
 for i=2:length(N)
     if resetk(i)==1
-        kx(sum(N(1:i-1)):sum(N(1:i))) = linspace(0,0,N(i));
-        ky(sum(N(1:i-1)):sum(N(1:i))) = linspace(0,0,N(i));
+        kx(sum(N(1:i-1)+1):sum(N(1:i))) = linspace(0,0,N(i));
+        ky(sum(N(1:i-1)+1):sum(N(1:i))) = linspace(0,0,N(i));
     else
         for j=sum(N(1:i-1))+1:sum(N(1:i))
             kx(j) = kx(j-1) + (Time(j)-Time(j-1))*gamma/(2*pi)*Gx(i);

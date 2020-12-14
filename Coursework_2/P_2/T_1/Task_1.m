@@ -10,8 +10,12 @@ addpath 'C:\Users\Imraj Singh\Documents\UCL\Comp_MRI\COMP0121\Coursework_2\Funct
 
 %% Define coordinate position of each isochromat
 
+% Spatial spacing
+dxy = 1/(500*2);
+
 % Length of segment
-L = 20/10000;
+Num = 8;
+L = Num*dxy;
 
 % Sampling time
 Ts = 5.12/1000;
@@ -19,22 +23,19 @@ Ts = 5.12/1000;
 % Sampling time
 Gradient = -4.6/1000;
 
-% Number of isochromats x
-Numx = 51;
-
-% Number of isochromats y
-Numy = 51;
+% Number of isochromats x and y
+Numxy = L/dxy/2;
 
 % Spatial coordinates of isochromats (m)
-x1 = linspace(-L/2,0,Numx);
-y1 = linspace(0,L/2,Numy);
+x1 = linspace(-L/2 + dxy/2, 0 - dxy/2,Numxy);
+y1 = linspace(0 + dxy/2, L/2 - dxy/2,Numxy);
 
 % Create mesh grid of x and y coordinates
 [X1, Y1] = meshgrid(x1,y1);
 
 % Spatial coordinates of isochromats (m)
-x2 = linspace(0,L/2,Numx);
-y2 = linspace(-L/2,0,Numy);
+x2 = linspace(0 + dxy/2, L/2 - dxy/2,Numxy);
+y2 = linspace(-L/2 + dxy/2, 0 - dxy/2,Numxy);
 
 % Create mesh grid of x and y coordinates
 [X2, Y2] = meshgrid(x2,y2);
@@ -43,7 +44,7 @@ y2 = linspace(-L/2,0,Numy);
 X = [X1(:);X2(:)];
 Y = [Y1(:);Y2(:)];
 
-clearvars x2 y2 X1 Y1 X2 Y2
+clearvars X1 Y1 X2 Y2
 %% Set NMR parameters and initialise isochromat structures
 
 % Gyromagnetic ratio of hyrodrogen proton
@@ -79,13 +80,13 @@ clearvars B0
 % by flipping the spins with a pi/2 hard RF pulse along the x' axis over
 % 0.32ms
 
-NumGx = 16;
-NumGy = 16;
-Gradient_y = linspace(Gradient,-Gradient,NumGy + 1);
+NumGx = Num*2;
+NumGy = Num*2;
+Gradient_y = linspace(Gradient,-Gradient, NumGy + 1);
 
 % [Set the number of points to be calculated minimum of 2 for each block
 %blocks.N = [1 65 129 257];
-blocks.N = [1 17 1+NumGx/2 1+NumGx/2 1+NumGx];
+blocks.N = [1 1 1+NumGx/2 1+NumGx/2 1+NumGx];
 
 % Time over which the block occurs
 blocks.t = [0 .32/1000 Ts/2 Ts/2 Ts];
@@ -94,7 +95,7 @@ blocks.t = [0 .32/1000 Ts/2 Ts/2 Ts];
 blocks.Gx = [0 0 0 Gradient -Gradient];
 
 % The gradient of the field dB/dz for each block
-blocks.Gy = [0 0 Gradient_y(2) 0 0];
+blocks.Gy = [0 0 Gradient_y(1) 0 0];
 
 % The relaxation time only when spins are relaxation
 blocks.relax = [0 0 Ts/2 Ts/2 Ts];
@@ -114,7 +115,7 @@ for i=2:NumGy
     blocks.Gx = [blocks.Gx 0 0 Gradient -Gradient];
     
     % The gradient of the field dB/dz for each block
-    blocks.Gy = [blocks.Gy 0 Gradient_y(i+1) 0 0];
+    blocks.Gy = [blocks.Gy 0 Gradient_y(i) 0 0];
     
     % The relaxation time only when spins are relaxation
     blocks.relax = [blocks.relax 0 Ts/2 Ts/2 Ts];
@@ -133,10 +134,11 @@ My = zeros(sum(blocks.N),1);
 Mz = zeros(sum(blocks.N),1);
 
 % Subset definition
-Sub_Set = linspace(-L/2,L/2,11);
+Sub_num = 2;
+Sub_Set = [ min(x1) max(x1) min(x2) max(x2) ];%[(min(x1)-max(x1))/2 min(x1) max(x1) (max(x2)-min(x2))/2 min(x2) max(x2) ];
 
 % Colour map ensuring that only isochromats have colour
-map = ones(Numx*2-1,Numy*2-1,sum(blocks.N))*-1;
+map = ones(Numxy*2,Numxy*2,sum(blocks.N))*-1;
 
 z = 1;
 Check_Dup = false;
@@ -180,8 +182,8 @@ for i=1:length(iso)
     end
     
     % Calculate the index's for the map array dependent on spatial location
-    ix = round((iso(i).x+L/2)/(x1(2)-x1(1)) + 1);
-    iy = round((iso(i).y+L/2)/(y1(2)-y1(1)) + 1);
+    ix = round((iso(i).x+L/2-dxy/2)/(x1(2)-x1(1)) + 1);
+    iy = round((iso(i).y+L/2-dxy/2)/(y1(2)-y1(1)) + 1);
     
     % Calculate the angles on the x-y plane the spin vector for each
     % isochromat corresponding to a pixel, additionally we round up with
@@ -195,11 +197,8 @@ for i=1:length(iso)
     % Find the subset of isos that we specify that can select certain
     % isochromats within the whole domain which we calculated for the
     % imagesc for better visualisation
-    if  ismember(iso(i).x,Sub_Set) && ismember(iso(i).y,Sub_Set)
-        % Add the magnetisations to the total  magnetisation
-        Mx = Mx + iso(i).Mx;
-        My = My + iso(i).My;
-        Mz = Mz + iso(i).Mz;
+    if  ismembertol(iso(i).x,Sub_Set) && ismembertol(iso(i).y,Sub_Set)
+        % Add to the plottable sub-set
         Sub_Set_iso(z) = iso(i);
         
         % Change the Check_Dup value once the first [0,0] isochromat is
@@ -218,6 +217,11 @@ for i=1:length(iso)
         
     end
     
+    % Add the magnetisations to the total  magnetisation
+    Mx = Mx + iso(i).Mx;
+    My = My + iso(i).My;
+    Mz = Mz + iso(i).Mz;
+    
     % Clear the arrays as they take up a lot of memory
     iso(i).Mx = [];
     iso(i).My = [];
@@ -225,9 +229,9 @@ for i=1:length(iso)
 end
 
 % Magnetisation now normalised across all the spins
-Mx = Mx/(2*round(length(Sub_Set)/2)^2+1);
-My = My/(2*round(length(Sub_Set)/2)^2+1);
-Mz = Mz/(2*round(length(Sub_Set)/2)^2+1);
+Mx = Mx/(length(iso));
+My = My/(length(iso));
+Mz = Mz/(length(iso));
 
 % Calculate the time vector
 Time = unroll_time(blocks.N,blocks.t);
@@ -235,20 +239,20 @@ Time = unroll_time(blocks.N,blocks.t);
 % Calculate the Gx, Gy, kx, ky vectors in time
 [Gx_t, Gy_t, kx, ky] = unroll_plotting(blocks.N,blocks.Gx,blocks.Gy,blocks.resetk,gamma,Time);
 
-s_filter = unroll_signal(Time, blocks.N, blocks.signal, Mx,My,Mz);
+s_filter = unroll_signal(blocks.N, blocks.signal);
 
 clearvars iso z Check_Dup ix iy R_FoR T1 T2 Ts X Y x1 y1 gamma NumGx NumGy Gradient_y index ii i k
 %% Animation module
 
 % Normalisation constants used for plotting the quiver3s
-norm = 0.001;
+norm = .5;
 norm_scale = 2;
 
 % Set the video writing name and location
 video = VideoWriter(['P1_E3', '.mp4'], 'MPEG-4');
 
 % Set the frame rate of video
-frameRate = 10;
+frameRate = 5;
 video.set('FrameRate', frameRate);
 
 % Open the video
@@ -280,18 +284,18 @@ for i=1:length(Time)
     colormap([1 1 1; hsv(360)]);
     
     if Time(i)>=0 && Time(i)<sum(blocks.t(1:2))
-        imagesc(linspace(-L/2,L/2,Numx*2-1),linspace(-L/2,L/2,Numy*2-1),ones(length(map(:,1,1)))*-1,[-1 360])
+        imagesc(linspace(-L/2 + dxy/2,L/2 - dxy/2,Numxy*2)*1000,linspace(-L/2 + dxy/2,L/2 - dxy/2,Numxy*2)*1000,ones(length(map(:,:,1)))*-1,[-1 360])
     elseif Time(i)>=sum(blocks.t(1:2))
-        imagesc(linspace(-L/2,L/2,Numx*2-1),linspace(-L/2,L/2,Numy*2-1),map(:,:,i),[-1 360])
+        imagesc(linspace(-L/2 + dxy/2,L/2 - dxy/2,Numxy*2)*1000,linspace(-L/2 + dxy/2,L/2 - dxy/2,Numxy*2)*1000,map(:,:,i),[-1 360])
     end
     hold on
     % First element of vector of iso structs
-    quiver3(Sub_Set_iso(1).x,Sub_Set_iso(1).y,0,Sub_Set_iso(1).Mx(i)*norm,Sub_Set_iso(1).My(i)*norm,Sub_Set_iso(1).Mz(i)*norm,'linewidth',2,'LineStyle','-','Color','k');
-    scatter(Sub_Set_iso(1).x,Sub_Set_iso(1).y, 10,'MarkerEdgeColor',[0 0 0],'MarkerFaceColor',[1 1 1],'LineWidth',1);
+    quiver3(Sub_Set_iso(1).x*1000,Sub_Set_iso(1).y*1000,0,Sub_Set_iso(1).Mx(i)*norm,Sub_Set_iso(1).My(i)*norm,Sub_Set_iso(1).Mz(i)*norm,'linewidth',2,'LineStyle','-','Color','k');
+    scatter(Sub_Set_iso(1).x*1000,Sub_Set_iso(1).y*1000, 10,'MarkerEdgeColor',[0 0 0],'MarkerFaceColor',[1 1 1],'LineWidth',1);
     for z=2:length(Sub_Set_iso)
         % z'th element of vector of iso structs
-        quiver3(Sub_Set_iso(z).x,Sub_Set_iso(z).y,0,Sub_Set_iso(z).Mx(i)*norm,Sub_Set_iso(z).My(i)*norm,Sub_Set_iso(z).Mz(i)*norm,'linewidth',2,'LineStyle','-','Color','k');
-        scatter(Sub_Set_iso(z).x,Sub_Set_iso(z).y, 10,'MarkerEdgeColor',[0 0 0],'MarkerFaceColor',[1 1 1],'LineWidth',1);
+        quiver3(Sub_Set_iso(z).x*1000,Sub_Set_iso(z).y*1000,0,Sub_Set_iso(z).Mx(i)*norm,Sub_Set_iso(z).My(i)*norm,Sub_Set_iso(z).Mz(i)*norm,'linewidth',2,'LineStyle','-','Color','k');
+        scatter(Sub_Set_iso(z).x*1000,Sub_Set_iso(z).y*1000, 10,'MarkerEdgeColor',[0 0 0],'MarkerFaceColor',[1 1 1],'LineWidth',1);
     end
     set(gca,'YDir','normal');
     grid on
@@ -309,16 +313,21 @@ for i=1:length(Time)
     hold on
     plot(Time(1:i)*1000,My(1:i),'linewidth',1,'LineStyle','-','Color','b')
     % plot the signal points
-    plot(Time(1:i)*1000,s_filter(1:i).*Mx(1:i),'.','MarkerSize',8,'Color','r')
-    hold on
-    plot(Time(1:i)*1000,s_filter(1:i).*My(1:i),'.','MarkerSize',8,'Color','b')
+    if Time(i)>sum(blocks.t(1:4))
+        plot(Time(find(s_filter(1:i)))*1000,Mx(find(s_filter(1:i))),'.','MarkerSize',8,'Color','r')
+        plot(Time(find(s_filter(1:i)))*1000,My(find(s_filter(1:i))),'.','MarkerSize',8,'Color','b')
+    end
     grid on
     box on
     hold off
     % Set the legend
     legend("$M_{x'}$","$M_{y'}$", "interpreter", "latex", "fontsize", 10,'Location','southeast')
     % Set the axes limits
-    xlim([0 max(Time)*1.2*1000]);
+    if Time(i)>=0 && Time(i)<sum(blocks.t(1:5))
+        xlim([0 sum(blocks.t(1:5))]*1000)
+    elseif Time(i)>=sum(blocks.t(1:5))
+        xlim([Time(i)-sum(blocks.t(1:5)) Time(i)]*1000)
+    end
     ylim([-1 1]*1.2);
     % Set the axes labels
     xlabel("Time (ms)", "interpreter", "latex", "fontsize", 10)
@@ -328,13 +337,12 @@ for i=1:length(Time)
     % Third subplot - K space values
     subplot(2,2,3);
     % plot the signal points
-    plot(s_filter(1:i).*kx(1:i)/1000,s_filter(1:i).*ky(1:i)/1000,'.','MarkerSize',8,'Color','k')
-    hold on
+    if Time(i)>sum(blocks.t(1:4))
+        plot(kx(find(s_filter(1:i)))/1000,ky(find(s_filter(1:i)))/1000,'.','MarkerSize',8,'Color','k')
+        hold on
+    end
     % plot the current location
     plot(kx(i)/1000,ky(i)/1000,'x','MarkerSize',5,'Color','k')
-    
-    % Current K space value
-    plot(kx(i)/1000,ky(i)/1000,'.','MarkerSize',8,'Color','k')
     grid on
     box on
     hold off
@@ -358,17 +366,21 @@ for i=1:length(Time)
     hold off
     % Set the legend
     legend("$k_x$","$k_y$", "interpreter", "latex", "fontsize", 10,'Location','northwest')
-    % Set the axes limits
-    xlim([0 max(Time)*1.2*1000]);
+    % Set the axes limits    
+    if Time(i)>=0 && Time(i)<sum(blocks.t(1:5))
+        xlim([0 sum(blocks.t(1:5))]*1000)
+    elseif Time(i)>=sum(blocks.t(1:5))
+        xlim([Time(i)-sum(blocks.t(1:5)) Time(i)]*1000)
+    end
     ylim([-.6 .6])
     % Set the axes labels
     xlabel("Time (ms)", "interpreter", "latex", "fontsize", 10)
     ylabel("Spatial frequency (1/mm)", "interpreter", "latex", "fontsize", 10)
-    
+%     pause(0.1)
     % Set frame to add to video
     frame = getframe(h);
     video.writeVideo(frame);
 end
 
-Close the video
+% Close the video
 video.close();

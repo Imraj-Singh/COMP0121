@@ -1,6 +1,11 @@
 function iso = initialise_iso(x,y)
-%UNTITLED Summary of this function goes here
-%   Detailed explanation goes here
+%INITALISE_ISO by Imraj Singh
+% Inputs
+%   x,y
+% Outputs
+%   iso
+
+% Initialise the isochromat structure and set the x,y values 
 iso(1:length(x)) = struct();
 for i=1:length(x)
         iso(i).x = x(i);

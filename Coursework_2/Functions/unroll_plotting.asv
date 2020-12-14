@@ -24,7 +24,7 @@ for i=2:length(N)
         kx(sum(N(1:i-1)+1):sum(N(1:i))) = linspace(0,0,N(i));
         ky(sum(N(1:i-1)+1):sum(N(1:i))) = linspace(0,0,N(i));
     else
-        % calculate the k-space value
+        % 
         for j=sum(N(1:i-1))+1:sum(N(1:i))
             kx(j) = kx(j-1) + (Time(j)-Time(j-1))*gamma/(2*pi)*Gx(i);
             ky(j) = ky(j-1) + (Time(j)-Time(j-1))*gamma/(2*pi)*Gy(i);

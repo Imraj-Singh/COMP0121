@@ -52,7 +52,7 @@ for i=1:N
     % brute force
     h = subplot(3,1,2);
     if val == 0
-        plotComplex(x*1000,exp(2*pi*1i*val*x),h);
+        plotComplex(x*1000,exp(2*pi*1i*val*x)/N,h);
     else
         plotComplex(x*1000,exp(2*pi*1i*nonzeros(signal.*k)*x)/N,h);
     end

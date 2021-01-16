@@ -62,7 +62,7 @@ ylabel("$k_y$ (1/mm)", "interpreter", "latex", "fontsize", 10)
 set(gca, 'defaultAxesTickLabelInterpreter','latex');  
 
 % Reject points under a certain values
-percentreject = .2;
+percentreject = .99;
 vector = sort(kspace(:));
 threshold = vector(round(length(vector)*percentreject));
 kspace(abs(kspace) <= abs(threshold)) = 0;

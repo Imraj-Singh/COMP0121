@@ -39,7 +39,7 @@ ylabel("Signal", "interpreter", "latex", "fontsize", 10)
 h = subplot(3,1,2);
 sumcomp = zeros(1,N);
 for i=1:N
-    sumcomp = sumcomp + signal(i)*(exp(2*pi*1i*k(i)*x));
+    sumcomp = sumcomp + signal(i)*(exp(2*pi*1i*k(i)*x))/N;
 end
 plotComplex(x*1000,sumcomp,h);
 grid on
@@ -51,7 +51,7 @@ xlabel("$x$ (mm)", "interpreter", "latex", "fontsize", 10)
 ylabel("$\rho$", "interpreter", "latex", "fontsize", 10)
 
 h = subplot(3,1,3);
-plotComplex(x*1000,fftshift(ifft(ifftshift(signal))*N),h);
+plotComplex(x*1000,fftshift(ifft(ifftshift(signal))),h);
 grid on
 box on
 hold off

@@ -59,15 +59,15 @@ for i=1:N
     % brute force
     h = subplot(3,1,2);
     if val == 0
-        plotComplex(x*1000,nonzeros(signal)*exp(2*pi*1i*x),h);
+        plotComplex(x*1000,nonzeros(signal)*exp(2*pi*1i*x)/N,h);
     else
-        plotComplex(x*1000,nonzeros(signal)*exp(2*pi*1i*nonzeros(k.*double(k == val))*x),h);
+        plotComplex(x*1000,nonzeros(signal)*exp(2*pi*1i*nonzeros(k.*double(k == val))*x)/N,h);
     end
     grid on
     box on
     hold off
     xlim([x(1)*1000 x(end)*1000])
-    lims_val = fftshift(ifft(ifftshift(gaus(k,0,8*dk).*[zeros(1,64),1,zeros(1,63)]))*N);
+    lims_val = fftshift(ifft(ifftshift(gaus(k,0,8*dk).*[zeros(1,64),1,zeros(1,63)])));
     ylim([-max(lims_val) max(lims_val)])
     title('Linearity', "interpreter", "latex", "fontsize", 10)
     % Set the axes labels
@@ -75,12 +75,12 @@ for i=1:N
     ylabel("$\rho$", "interpreter", "latex", "fontsize", 10)
     
     h = subplot(3,1,3);
-    plotComplex(x*1000,fftshift(ifft(ifftshift(signal))*N),h);
+    plotComplex(x*1000,fftshift(ifft(ifftshift(signal))),h);
     grid on
     box on
     hold off
     xlim([x(1)*1000 x(end)*1000])
-    lims_val = fftshift(ifft(ifftshift(gaus(k,0,8*dk).*[zeros(1,64),1,zeros(1,63)]))*N);
+    lims_val = fftshift(ifft(ifftshift(gaus(k,0,8*dk).*[zeros(1,64),1,zeros(1,63)])));
     ylim([-max(lims_val) max(lims_val)])
     title('Brute force - IFFT(Signal) with shift', "interpreter", "latex", "fontsize", 10)
     % Set the axes labels

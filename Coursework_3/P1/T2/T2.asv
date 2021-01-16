@@ -19,45 +19,37 @@ k = linspace(-dk*(N/2),dk*(N/2-1),N);
 % Define the distances
 x = linspace(-FOV/2,FOV/2 - FOV/N,N);
 
-% Define Gaussian
-gaus = @(x,mu,sig)(1/(sig*sqrt(2)))*exp(-(((x-mu).^2)/(2*sig.^2)));
+% Impulse location
+val = dk*0;
 
-% Calculate signal
-signal = gaus(k,0,8*dk).*double(k <= 8*dk).*double(k >= -8*dk);
+% Make signal vector with unit impulse
+signal = double(k == val);
 
-
+figure
 % original
 h = subplot(3,1,1);
 plotComplex(k/1000,signal,h);
-grid on
-box on
-hold off
-title('Signal = G(k) * rect', "interpreter", "latex", "fontsize", 10)
+title('Signal', "interpreter", "latex", "fontsize", 10)
 xlabel("$k$ (1/mm)", "interpreter", "latex", "fontsize", 10)
 ylabel("Signal", "interpreter", "latex", "fontsize", 10)
+% shifted
 
-% brute force
+
+% original
 h = subplot(3,1,2);
-plotComplex(x*1000,fftshift(ifft(ifftshift(double(k <= 8*dk).*double(k >= -8*dk)))),h);
-grid on
-box on
-hold off
-title("Point spread function of rect function", "interpreter", "latex", "fontsize", 10)
-% Set the axes labels
+plotComplex(x*1000,fftshift(ifft(ifftshift(signal)))*N,h);
+title('IFFT(Signal) - Not shifted', "interpreter", "latex", "fontsize", 10)
 xlabel("$x$ (mm)", "interpreter", "latex", "fontsize", 10)
 ylabel("$\rho$", "interpreter", "latex", "fontsize", 10)
+% shifted
 
-% brute force
 h = subplot(3,1,3);
-plotComplex(x*1000,fftshift(ifft(ifftshift(signal))),h);
+plotComplex(x*1000, dk*exp(2*pi*1i*dk*N/2*x)/N,h);
 grid on
 box on
 hold off
-title("IFFT (Signal)", "interpreter", "latex", "fontsize", 10)
+title('IFFT(Signal) - Shifted', "interpreter", "latex", "fontsize", 10)
 % Set the axes labels
 xlabel("$x$ (mm)", "interpreter", "latex", "fontsize", 10)
 ylabel("$\rho$", "interpreter", "latex", "fontsize", 10)
-
-
-
 

@@ -35,13 +35,13 @@ plotComplex(k/1000,signal,h);
 grid on
 box on
 hold off
-title('Signal = Gaussian * Hanning', "interpreter", "latex", "fontsize", 10)
+title('Signal = G(k) * Hanning', "interpreter", "latex", "fontsize", 10)
 xlabel("$k$ (1/mm)", "interpreter", "latex", "fontsize", 10)
 ylabel("Signal", "interpreter", "latex", "fontsize", 10)
 
 % brute force
 h = subplot(3,1,2);
-plotComplex(x*1000,fftshift(ifft(ifftshift(hann))*N),h);
+plotComplex(x*1000,fftshift(ifft(ifftshift(hann))),h);
 grid on
 box on
 hold off
@@ -51,7 +51,7 @@ xlabel("$x$ (mm)", "interpreter", "latex", "fontsize", 10)
 ylabel("$\rho$", "interpreter", "latex", "fontsize", 10)
 
 h = subplot(3,1,3);
-plotComplex(x*1000,fftshift(ifft(ifftshift(signal))*N),h);
+plotComplex(x*1000,fftshift(ifft(ifftshift(signal))),h);
 grid on
 box on
 hold off

@@ -29,25 +29,31 @@ figure
 % original
 h = subplot(3,1,1);
 plotComplex(k/1000,signal,h);
-title('Signal', "interpreter", "latex", "fontsize", 10)
-xlabel("$k$ (1/mm)", "interpreter", "latex", "fontsize", 10)
-ylabel("Signal", "interpreter", "latex", "fontsize", 10)
-% shifted
-
-
-% original
-h = subplot(3,1,2);
-plotComplex(x*1000,ifft(signal)*N,h);
-title('IFFT(Signal) - Not shifted', "interpreter", "latex", "fontsize", 10)
-xlabel("$x$ (mm)", "interpreter", "latex", "fontsize", 10)
-ylabel("$\rho$", "interpreter", "latex", "fontsize", 10)
-% shifted
-
-h = subplot(3,1,3);
-plotComplex(x*1000, dk*exp(2*pi*1i*dk*N/2*x)/N,h);
 grid on
 box on
 hold off
+title('Signal', "interpreter", "latex", "fontsize", 10)
+xlabel("$k$ (1/mm)", "interpreter", "latex", "fontsize", 10)
+ylabel("Signal", "interpreter", "latex", "fontsize", 10)
+
+% original
+h = subplot(3,1,2);
+plotComplex(x*1000,ifft(signal),h);
+grid on
+box on
+hold off
+ylim([-0.01 0.01])
+title('IFFT(Signal) - Not shifted', "interpreter", "latex", "fontsize", 10)
+xlabel("$x$ (mm)", "interpreter", "latex", "fontsize", 10)
+ylabel("$\rho$", "interpreter", "latex", "fontsize", 10)
+
+% shifted
+h = subplot(3,1,3);
+plotComplex(x*1000,fftshift(ifft(ifftshift(signal))),h);
+grid on
+box on
+hold off
+ylim([-0.01 0.01])
 title('IFFT(Signal) - Shifted', "interpreter", "latex", "fontsize", 10)
 % Set the axes labels
 xlabel("$x$ (mm)", "interpreter", "latex", "fontsize", 10)

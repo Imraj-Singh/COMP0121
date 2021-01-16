@@ -54,7 +54,7 @@ for i=1:N
     if val == 0
         plotComplex(x*1000,exp(2*pi*1i*val*x),h);
     else
-        plotComplex(x*1000,exp(2*pi*1i*nonzeros(signal.*k)*x),h);
+        plotComplex(x*1000,exp(2*pi*1i*nonzeros(signal.*k)*x)/N,h);
     end
     grid on
     box on
@@ -65,7 +65,7 @@ for i=1:N
     ylabel("$\rho$", "interpreter", "latex", "fontsize", 10)
     
     h = subplot(3,1,3);
-    plotComplex(x*1000,fftshift(ifft(ifftshift(signal))*N),h);
+    plotComplex(x*1000,fftshift(ifft(ifftshift(signal))),h);
     grid on
     box on
     hold off
@@ -81,21 +81,3 @@ end
 
 % Close the video
 video.close();
-
-% %% Brute force
-% 
-% out = zeros(1,N);
-% 
-% for ii=1:N
-%     sum = 0.0;
-%     for jj=1:N
-%         sum = sum + kval(jj) * exp(2*1i*pi*k(ii)/dk*k(jj)/dk/N);
-%     end
-%     out(ii) = sum;
-% end
-%  
-%  
-% % shift of fourier of shift
-% h = subplot(5,2,9:10);
-% plotComplex(x,out,h);
-
